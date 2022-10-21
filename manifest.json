@@ -1,0 +1,13 @@
+{
+	"manifest_version": 3,
+	"name": "Tabs Poli",
+	"version": "1.0.0",
+	"description": "Limits the number of open tabs",
+	"permissions": ["tabs"],
+	"action": {
+		"default_popup": "index.html"
+	},
+	"background": {
+		"service_worker": "api.js"
+	}
+}
