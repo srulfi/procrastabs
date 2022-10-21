@@ -29,16 +29,16 @@ const TabsPoli = {
 	},
 	updateBadge() {
 		this.badge.setText(this.tabsCount.toString())
-		this.badge.setBackgroundColor("9688F1")
+		this.badge.setBackgroundColor("#9688F1")
 	},
 	async setTabsCount() {
 		this.tabs = await chrome.tabs.query({})
 		this.tabsCount = this.tabs.length
 	},
 	syncStorage() {
-		const tabs = this.tabsCount || DEFAULT_MAX_TABS
-		chrome.storage.sync.set({ tabs }, () => {
-			console.log("chrome storage synced with tabs: ", tabs)
+		const tabsOpened = this.tabsCount || DEFAULT_MAX_TABS
+		chrome.storage.sync.set({ tabsOpened }, () => {
+			console.log("tabsOpened synced: ", tabsOpened)
 		})
 	},
 }
