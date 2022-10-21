@@ -20,12 +20,16 @@ const TabsPoli = {
 	setListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
 			this.tabsCount += 1
-			this.updateBadge()
+			this.runSync()
 		})
 		chrome.tabs.onRemoved.addListener((tab) => {
 			this.tabsCount -= 1
-			this.updateBadge()
+			this.runSync()
 		})
+	},
+	runSync() {
+		this.updateBadge()
+		this.syncStorage()
 	},
 	updateBadge() {
 		this.badge.setText(this.tabsCount.toString())
