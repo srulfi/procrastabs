@@ -3,7 +3,7 @@
 	"name": "Tabs Poli",
 	"version": "1.0.0",
 	"description": "Limits the number of open tabs",
-	"permissions": ["tabs"],
+	"permissions": ["tabs", "storage"],
 	"action": {
 		"default_popup": "index.html"
 	},

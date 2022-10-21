@@ -1,9 +1,13 @@
+const DEFAULT_MAX_TABS = 10
+
 const TabsPoli = {
 	tabs: [],
 	tabsCount: 0,
 	async init() {
 		this.setListeners()
-		await this.getAllTabs()
+
+		await this.setTabsCount()
+		this.syncStorage()
 	},
 	badge: {
 		setText(text) {
@@ -27,9 +31,15 @@ const TabsPoli = {
 		this.badge.setText(this.tabsCount.toString())
 		this.badge.setBackgroundColor("9688F1")
 	},
-	async getAllTabs() {
+	async setTabsCount() {
 		this.tabs = await chrome.tabs.query({})
 		this.tabsCount = this.tabs.length
+	},
+	syncStorage() {
+		const tabs = this.tabsCount || DEFAULT_MAX_TABS
+		chrome.storage.sync.set({ tabs }, () => {
+			console.log("chrome storage synced with tabs: ", tabs)
+		})
 	},
 }
 
