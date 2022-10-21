@@ -1,0 +1,53 @@
+.tabs-switch-container {
+	display: flex;
+	flex-direction: row;
+}
+
+#tabs-input {
+	font-size: 20px;
+	width: 50px;
+}
+
+input[type=checkbox] {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+label {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 60px;
+  height: 30px;
+  background: grey;
+  display: block;
+  border-radius: 30px;
+	border: 1px solid #e4e4e4;
+  position: relative;
+}
+
+label:after {
+  content: "";
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border-radius: 30px;
+	border: 1px solid lightgray;
+  transition: 0.3s;
+}
+
+input:checked + label {
+  background: #bada55;
+}
+
+input:checked + label:after {
+  left: calc(100%);
+  transform: translateX(-100%);
+}
+
+label:active:after {
+  width: 28px;
+}
