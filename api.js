@@ -2,6 +2,7 @@ const TabsPoli = {
 	tabs: [],
 	openTabs: 0,
 	enabled: false,
+
 	async init() {
 		this.setTabsListeners()
 		this.setStorageSyncListener()
@@ -9,14 +10,7 @@ const TabsPoli = {
 		await this.setOpenTabs()
 		this.syncStorage()
 	},
-	badge: {
-		setText(text) {
-			chrome.action.setBadgeText({ text })
-		},
-		setBackgroundColor(color) {
-			chrome.action.setBadgeBackgroundColor({ color })
-		},
-	},
+
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
 			this.openTabs += 1
@@ -27,6 +21,7 @@ const TabsPoli = {
 			this.runSync()
 		})
 	},
+
 	setStorageSyncListener() {
 		chrome.storage.onChanged.addListener((changes) => {
 			const changesArray = Object.entries(changes)
@@ -37,20 +32,24 @@ const TabsPoli = {
 			}
 		})
 	},
-	runSync() {
-		this.updateBadge()
-		this.syncStorage()
-	},
-	updateBadge() {
-		this.badge.setText(this.openTabs.toString())
-		this.badge.setBackgroundColor("#9688F1")
-	},
+
 	async setOpenTabs() {
 		this.tabs = await chrome.tabs.query({})
 		this.openTabs = this.tabs.length
 	},
+
+	updateBadge() {
+		chrome.action.setBadgeText({ text: this.openTabs.toString() })
+		chrome.action.setBadgeBackgroundColor({ color: "#9688F1" })
+	},
+
 	syncStorage() {
 		chrome.storage.sync.set({ openTabs: this.openTabs })
+	},
+
+	runSync() {
+		this.updateBadge()
+		this.syncStorage()
 	},
 }
 
