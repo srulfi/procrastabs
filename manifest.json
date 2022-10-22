@@ -8,6 +8,6 @@
 		"default_popup": "index.html"
 	},
 	"background": {
-		"service_worker": "api.js"
+		"service_worker": "background.js"
 	}
 }
