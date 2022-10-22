@@ -1,10 +1,10 @@
-const DEFAULT_MAX_TABS = 10
-
 const TabsPoli = {
 	tabs: [],
 	tabsCount: 0,
+	enabled: false,
 	async init() {
-		this.setListeners()
+		this.setTabsListeners()
+		this.setStorageSyncListener()
 
 		await this.setTabsCount()
 		this.syncStorage()
@@ -17,7 +17,7 @@ const TabsPoli = {
 			chrome.action.setBadgeBackgroundColor({ color })
 		},
 	},
-	setListeners() {
+	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
 			this.tabsCount += 1
 			this.runSync()
@@ -25,6 +25,16 @@ const TabsPoli = {
 		chrome.tabs.onRemoved.addListener((tab) => {
 			this.tabsCount -= 1
 			this.runSync()
+		})
+	},
+	setStorageSyncListener() {
+		chrome.storage.onChanged.addListener((changes) => {
+			const changesArray = Object.entries(changes)
+			const [key, { newValue }] = changesArray[0]
+
+			if (key === "enabled") {
+				this.enabled = newValue
+			}
 		})
 	},
 	runSync() {
@@ -40,10 +50,8 @@ const TabsPoli = {
 		this.tabsCount = this.tabs.length
 	},
 	syncStorage() {
-		const tabsOpened = this.tabsCount || DEFAULT_MAX_TABS
-		chrome.storage.sync.set({ tabsOpened }, () => {
-			console.log("tabsOpened synced: ", tabsOpened)
-		})
+		const openTabs = this.tabsCount
+		chrome.storage.sync.set({ openTabs })
 	},
 }
 
