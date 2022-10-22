@@ -1,6 +1,6 @@
 {
 	"manifest_version": 3,
-	"name": "Tabs Poli",
+	"name": "Procrastabs",
 	"version": "1.0.0",
 	"description": "Limits the number of open tabs",
 	"permissions": ["tabs", "storage"],

@@ -1,4 +1,4 @@
-const TabsPoli = {
+const Procrastabs = {
 	tabs: [],
 	openTabs: 0,
 	enabled: false,
@@ -53,4 +53,4 @@ const TabsPoli = {
 	},
 }
 
-TabsPoli.init()
+Procrastabs.init()
