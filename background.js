@@ -16,6 +16,7 @@ const Procrastabs = {
 			this.openTabs += 1
 			this.runSync()
 		})
+
 		chrome.tabs.onRemoved.addListener((tab) => {
 			this.openTabs -= 1
 			this.runSync()
@@ -27,9 +28,7 @@ const Procrastabs = {
 			const changesArray = Object.entries(changes)
 			const [key, { newValue }] = changesArray[0]
 
-			if (key === "enabled") {
-				this.enabled = newValue
-			}
+			this[key] = newValue
 		})
 	},
 
