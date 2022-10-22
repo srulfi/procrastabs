@@ -8,7 +8,7 @@ const Procrastabs = {
 		this.setStorageSyncListener()
 
 		await this.setOpenTabs()
-		this.syncStorage()
+		this.runSync()
 	},
 
 	setTabsListeners() {
