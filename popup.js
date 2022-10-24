@@ -8,27 +8,30 @@ const Popup = {
 	$countdownSwitch: document.querySelector("#countdown-switch"),
 	$message: document.querySelector("#message"),
 
-	config: {
-		maxTabs: DEFAULT_MAX_TABS,
-		countdown: DEFAULT_COUNTDOWN_MINUTES,
-	},
 	tabsCount: undefined,
 
-	init() {
-		this.$maxTabsInput.value = this.config.maxTabs
-		this.$countdownInput.value = this.config.countdown
+	async init() {
+		await this.setConfigFromStorage()
 
-		this.setTabsCountFromStorage()
 		this.setEventListeners()
 		this.setStorageListeners()
 	},
 
-	setTabsCountFromStorage() {
-		chrome.storage.sync.get("tabsCount", (result) => {
-			const { tabsCount } = result
+	async setConfigFromStorage() {
+		const { tabsCount, maxTabs, maxTabsEnabled, countdown, countdownEnabled } =
+			await chrome.storage.sync.get([
+				"tabsCount",
+				"maxTabs",
+				"maxTabsEnabled",
+				"countdown",
+				"countdownEnabled",
+			])
 
-			this.tabsCount = tabsCount
-		})
+		this.tabsCount = tabsCount
+		this.$maxTabsInput.value = maxTabs || DEFAULT_MAX_TABS
+		this.$maxTabsSwitch.checked = maxTabsEnabled || false
+		this.$countdownInput.value = countdown / 60 || DEFAULT_COUNTDOWN_MINUTES
+		this.$countdownSwitch.checked = countdownEnabled || false
 	},
 
 	setEventListeners() {
@@ -40,14 +43,16 @@ const Popup = {
 				chrome.storage.sync.set({ maxTabsEnabled: false })
 			}
 
-			this.config.maxTabs = maxTabs
 			this.resetMessage()
 
 			chrome.storage.sync.set({ maxTabs })
 		})
 
 		this.$maxTabsSwitch.addEventListener("change", () => {
-			if (this.config.maxTabs < this.tabsCount && this.$maxTabsSwitch.checked) {
+			if (
+				this.$maxTabsInput.value < this.tabsCount &&
+				this.$maxTabsSwitch.checked
+			) {
 				this.$maxTabsSwitch.checked = false
 				this.updateMessage()
 			} else {
@@ -58,8 +63,7 @@ const Popup = {
 		})
 
 		this.$countdownInput.addEventListener("change", () => {
-			this.config.countdown = this.$countdownInput.value
-			const countdownInSeconds = this.config.countdown * 60
+			const countdownInSeconds = this.$countdownInput.value * 60
 
 			chrome.storage.sync.set({ countdown: countdownInSeconds })
 		})
@@ -83,7 +87,7 @@ const Popup = {
 	},
 
 	updateMessage() {
-		const extraTabs = this.tabsCount - this.config.maxTabs
+		const extraTabs = this.tabsCount - this.$maxTabsInput.value
 		const tabText = extraTabs > 1 ? "tabs" : "tab"
 
 		this.$message.textContent = `You need to close ${extraTabs} ${tabText}.`

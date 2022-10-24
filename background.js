@@ -6,6 +6,7 @@ const Procrastabs = {
 	activeTabId: undefined,
 	activeWindowId: undefined,
 	bypassSync: false,
+
 	config: {
 		maxTabs: undefined,
 		maxTabsEnabled: false,
@@ -15,15 +16,30 @@ const Procrastabs = {
 
 	async init() {
 		await this.setTabs()
+		await this.setPersistedConfig()
 
 		this.setTabsListeners()
 		this.setStorageSyncListener()
-		this.runSync()
+		this.updateBadge()
 	},
 
 	async setTabs() {
 		this.tabs = await chrome.tabs.query({})
 		this.tabsCount = this.tabs.length
+	},
+
+	async setPersistedConfig() {
+		const config = await chrome.storage.sync.get([
+			"maxTabs",
+			"maxTabsEnabled",
+			"countdown",
+			"countdownEnabled",
+		])
+
+		this.config = config
+		this.config.tabsCount = this.tabsCount
+
+		await chrome.storage.sync.set(config)
 	},
 
 	setTabsListeners() {
