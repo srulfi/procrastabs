@@ -1,7 +1,10 @@
 const Procrastabs = {
 	tabs: [],
-	openTabs: 0,
-	enabled: false,
+	openTabs: undefined,
+	config: {
+		enabled: false,
+		maxTabs: undefined,
+	},
 
 	async init() {
 		this.setTabsListeners()
@@ -13,13 +16,25 @@ const Procrastabs = {
 
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
-			this.openTabs += 1
-			this.runSync()
+			const totalOpenTabs = this.openTabs + 1
+
+			if (this.config.enabled && totalOpenTabs > this.config.maxTabs) {
+				chrome.tabs.remove(tab.id, () => {
+					this.tabClosedByExtension = true
+				})
+			} else {
+				this.openTabs = totalOpenTabs
+				this.runSync()
+			}
 		})
 
 		chrome.tabs.onRemoved.addListener((tab) => {
-			this.openTabs -= 1
-			this.runSync()
+			if (this.tabClosedByExtension) {
+				this.tabClosedByExtension = false
+			} else {
+				this.openTabs -= 1
+				this.runSync()
+			}
 		})
 	},
 
@@ -28,7 +43,7 @@ const Procrastabs = {
 			const changesArray = Object.entries(changes)
 			const [key, { newValue }] = changesArray[0]
 
-			this[key] = newValue
+			this.config[key] = newValue
 		})
 	},
 
