@@ -2,8 +2,8 @@ const Procrastabs = {
 	tabs: [],
 	openTabs: undefined,
 	config: {
-		enabled: false,
 		maxTabs: undefined,
+		maxTabsEnabled: false,
 	},
 
 	async init() {
@@ -18,7 +18,7 @@ const Procrastabs = {
 		chrome.tabs.onCreated.addListener((tab) => {
 			const totalOpenTabs = this.openTabs + 1
 
-			if (this.config.enabled && totalOpenTabs > this.config.maxTabs) {
+			if (this.config.maxTabsEnabled && totalOpenTabs > this.config.maxTabs) {
 				chrome.tabs.remove(tab.id, () => {
 					this.tabClosedByExtension = true
 				})

@@ -1,9 +1,17 @@
-.tabs-switch-container {
-	display: flex;
-	flex-direction: row;
+h1 {
+	font-size: 14px;
 }
 
-#tabs-input {
+.maxtabs-container,
+.countdown-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	margin-top: 10px;
+}
+
+#maxtabs-input,
+#countdown-input {
 	font-size: 20px;
 	width: 50px;
 }
@@ -50,4 +58,10 @@ input:checked + label:after {
 
 label:active:after {
   width: 28px;
+}
+
+#message {
+	height: 25px;
+	font-size: 11px;
+	color: red;
 }

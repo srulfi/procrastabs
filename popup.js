@@ -1,12 +1,16 @@
 const DEFAULT_MAX_TABS = 10
+const DEFAULT_COUNTDOWN = 5
 
 const Popup = {
-	$tabsInput: document.querySelector("#tabs-input"),
-	$switch: document.querySelector("#switch"),
+	$maxTabsInput: document.querySelector("#maxtabs-input"),
+	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
+	$countdownInput: document.querySelector("#countdown-input"),
+	$countdownSwitch: document.querySelector("#countdown-switch"),
 	$message: document.querySelector("#message"),
 
 	config: {
-		maxTabs: undefined,
+		maxTabs: DEFAULT_MAX_TABS,
+		countdown: DEFAULT_COUNTDOWN,
 	},
 	openTabs: undefined,
 
@@ -20,19 +24,18 @@ const Popup = {
 			const { openTabs } = result
 
 			this.openTabs = openTabs
-			this.config.maxTabs =
-				openTabs > DEFAULT_MAX_TABS ? DEFAULT_MAX_TABS : openTabs
-			this.$tabsInput.value = this.config.maxTabs
+			this.$maxTabsInput.value = this.config.maxTabs
+			this.$countdownInput.value = this.config.countdown
 		})
 	},
 
 	setListeners() {
-		this.$tabsInput.addEventListener("change", () => {
-			const maxTabs = this.$tabsInput.value
+		this.$maxTabsInput.addEventListener("change", () => {
+			const maxTabs = this.$maxTabsInput.value
 
 			if (maxTabs < this.openTabs) {
-				this.$switch.checked = false
-				chrome.storage.sync.set({ enabled: false })
+				this.$maxTabsSwitch.checked = false
+				chrome.storage.sync.set({ maxTabsEnabled: false })
 			}
 
 			this.config.maxTabs = maxTabs
@@ -41,15 +44,27 @@ const Popup = {
 			chrome.storage.sync.set({ maxTabs })
 		})
 
-		this.$switch.addEventListener("change", () => {
-			if (this.config.maxTabs < this.openTabs && this.$switch.checked) {
-				this.$switch.checked = false
+		this.$maxTabsSwitch.addEventListener("change", () => {
+			if (this.config.maxTabs < this.openTabs && this.$maxTabsSwitch.checked) {
+				this.$maxTabsSwitch.checked = false
 				this.updateMessage()
 			} else {
 				this.resetMessage()
 			}
 
-			chrome.storage.sync.set({ enabled: this.$switch.checked })
+			chrome.storage.sync.set({ maxTabsEnabled: this.$maxTabsSwitch.checked })
+		})
+
+		this.$countdownInput.addEventListener("change", () => {
+			this.config.countdown = this.$countdownInput.value
+
+			chrome.storage.sync.set({ countdown })
+		})
+
+		this.$countdownSwitch.addEventListener("change", () => {
+			chrome.storage.sync.set({
+				countdownEnabled: this.$countdownSwitch.checked,
+			})
 		})
 
 		chrome.storage.onChanged.addListener((changes) => {
@@ -66,7 +81,7 @@ const Popup = {
 		const extraTabs = this.openTabs - this.config.maxTabs
 		const tabText = extraTabs > 1 ? "tabs" : "tab"
 
-		this.$message.textContent = `You have ${extraTabs} more ${tabText} than allowed.`
+		this.$message.textContent = `You need to close ${extraTabs} ${tabText}.`
 	},
 
 	resetMessage() {
