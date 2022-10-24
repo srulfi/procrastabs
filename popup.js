@@ -12,22 +12,22 @@ const Popup = {
 		maxTabs: DEFAULT_MAX_TABS,
 		countdown: DEFAULT_COUNTDOWN_MINUTES,
 	},
-	openTabs: undefined,
+	tabsCount: undefined,
 
 	init() {
 		this.$maxTabsInput.value = this.config.maxTabs
 		this.$countdownInput.value = this.config.countdown
 
-		this.setOpenTabsFromStorage()
+		this.setTabsCountFromStorage()
 		this.setEventListeners()
 		this.setStorageListeners()
 	},
 
-	setOpenTabsFromStorage() {
-		chrome.storage.sync.get("openTabs", (result) => {
-			const { openTabs } = result
+	setTabsCountFromStorage() {
+		chrome.storage.sync.get("tabsCount", (result) => {
+			const { tabsCount } = result
 
-			this.openTabs = openTabs
+			this.tabsCount = tabsCount
 		})
 	},
 
@@ -35,7 +35,7 @@ const Popup = {
 		this.$maxTabsInput.addEventListener("change", () => {
 			const maxTabs = parseInt(this.$maxTabsInput.value)
 
-			if (maxTabs < this.openTabs) {
+			if (maxTabs < this.tabsCount) {
 				this.$maxTabsSwitch.checked = false
 				chrome.storage.sync.set({ maxTabsEnabled: false })
 			}
@@ -47,7 +47,7 @@ const Popup = {
 		})
 
 		this.$maxTabsSwitch.addEventListener("change", () => {
-			if (this.config.maxTabs < this.openTabs && this.$maxTabsSwitch.checked) {
+			if (this.config.maxTabs < this.tabsCount && this.$maxTabsSwitch.checked) {
 				this.$maxTabsSwitch.checked = false
 				this.updateMessage()
 			} else {
@@ -76,14 +76,14 @@ const Popup = {
 			const changesArray = Object.entries(changes)
 			const [key, { newValue }] = changesArray[0]
 
-			if (key === "openTabs") {
-				this.openTabs = newValue
+			if (key === "tabsCount") {
+				this.tabsCount = newValue
 			}
 		})
 	},
 
 	updateMessage() {
-		const extraTabs = this.openTabs - this.config.maxTabs
+		const extraTabs = this.tabsCount - this.config.maxTabs
 		const tabText = extraTabs > 1 ? "tabs" : "tab"
 
 		this.$message.textContent = `You need to close ${extraTabs} ${tabText}.`

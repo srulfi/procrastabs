@@ -1,6 +1,6 @@
 const Procrastabs = {
 	tabs: [],
-	openTabs: undefined,
+	tabsCount: 0,
 	activeTabId: undefined,
 	activeWindowId: undefined,
 	bypassSync: false,
@@ -12,18 +12,18 @@ const Procrastabs = {
 	},
 
 	async init() {
+		await this.setTabs()
+
 		this.setTabsListeners()
 		this.setStorageSyncListener()
-
-		await this.setOpenTabs()
 		this.runSync()
 	},
 
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
-			this.openTabs += 1
+			this.tabsCount += 1
 
-			if (this.config.maxTabsEnabled && this.openTabs > this.config.maxTabs) {
+			if (this.config.maxTabsEnabled && this.tabsCount > this.config.maxTabs) {
 				this.bypassSync = true
 				this.removeTab(tab.id)
 			} else {
@@ -33,14 +33,14 @@ const Procrastabs = {
 			if (
 				this.config.maxTabsEnabled &&
 				this.config.countdownEnabled &&
-				this.openTabs === this.config.maxTabs
+				this.tabsCount === this.config.maxTabs
 			) {
 				this.startCountdown()
 			}
 		})
 
 		chrome.tabs.onRemoved.addListener((tab) => {
-			this.openTabs -= 1
+			this.tabsCount -= 1
 
 			if (!this.bypassSync) {
 				this.runSync()
@@ -74,9 +74,9 @@ const Procrastabs = {
 		})
 	},
 
-	async setOpenTabs() {
+	async setTabs() {
 		this.tabs = await chrome.tabs.query({})
-		this.openTabs = this.tabs.length
+		this.tabsCount = this.tabs.length
 	},
 
 	startCountdown() {
@@ -84,7 +84,7 @@ const Procrastabs = {
 
 		this.countdownInterval = setInterval(() => {
 			if (++secondsPast === this.config.countdown) {
-				if (this.openTabs === this.config.maxTabs && this.activeTabId) {
+				if (this.tabsCount === this.config.maxTabs && this.activeTabId) {
 					this.removeTab(this.activeTabId)
 				}
 				clearInterval(this.countdownInterval)
@@ -97,12 +97,12 @@ const Procrastabs = {
 	},
 
 	updateBadge() {
-		chrome.action.setBadgeText({ text: this.openTabs.toString() })
+		chrome.action.setBadgeText({ text: this.tabsCount.toString() })
 		chrome.action.setBadgeBackgroundColor({ color: "#9688F1" })
 	},
 
 	syncStorage() {
-		chrome.storage.sync.set({ openTabs: this.openTabs })
+		chrome.storage.sync.set({ tabsCount: this.tabsCount })
 	},
 
 	runSync() {
