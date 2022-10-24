@@ -1,5 +1,5 @@
 const DEFAULT_MAX_TABS = 10
-const DEFAULT_COUNTDOWN = 5
+const DEFAULT_COUNTDOWN_MINUTES = 5
 
 const Popup = {
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
@@ -10,13 +10,17 @@ const Popup = {
 
 	config: {
 		maxTabs: DEFAULT_MAX_TABS,
-		countdown: DEFAULT_COUNTDOWN,
+		countdown: DEFAULT_COUNTDOWN_MINUTES,
 	},
 	openTabs: undefined,
 
 	init() {
+		this.$maxTabsInput.value = this.config.maxTabs
+		this.$countdownInput.value = this.config.countdown
+
 		this.setOpenTabsFromStorage()
-		this.setListeners()
+		this.setEventListeners()
+		this.setStorageListeners()
 	},
 
 	setOpenTabsFromStorage() {
@@ -24,14 +28,12 @@ const Popup = {
 			const { openTabs } = result
 
 			this.openTabs = openTabs
-			this.$maxTabsInput.value = this.config.maxTabs
-			this.$countdownInput.value = this.config.countdown
 		})
 	},
 
-	setListeners() {
+	setEventListeners() {
 		this.$maxTabsInput.addEventListener("change", () => {
-			const maxTabs = this.$maxTabsInput.value
+			const maxTabs = parseInt(this.$maxTabsInput.value)
 
 			if (maxTabs < this.openTabs) {
 				this.$maxTabsSwitch.checked = false
@@ -57,8 +59,9 @@ const Popup = {
 
 		this.$countdownInput.addEventListener("change", () => {
 			this.config.countdown = this.$countdownInput.value
+			const countdownInSeconds = this.config.countdown * 60
 
-			chrome.storage.sync.set({ countdown })
+			chrome.storage.sync.set({ countdown: countdownInSeconds })
 		})
 
 		this.$countdownSwitch.addEventListener("change", () => {
@@ -66,7 +69,9 @@ const Popup = {
 				countdownEnabled: this.$countdownSwitch.checked,
 			})
 		})
+	},
 
+	setStorageListeners() {
 		chrome.storage.onChanged.addListener((changes) => {
 			const changesArray = Object.entries(changes)
 			const [key, { newValue }] = changesArray[0]
