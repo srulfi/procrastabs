@@ -1,3 +1,5 @@
+chrome.runtime.onInstalled.addListener(() => Procrastabs.init())
+
 const Procrastabs = {
 	tabs: [],
 	tabsCount: 0,
@@ -17,6 +19,11 @@ const Procrastabs = {
 		this.setTabsListeners()
 		this.setStorageSyncListener()
 		this.runSync()
+	},
+
+	async setTabs() {
+		this.tabs = await chrome.tabs.query({})
+		this.tabsCount = this.tabs.length
 	},
 
 	setTabsListeners() {
@@ -74,11 +81,6 @@ const Procrastabs = {
 		})
 	},
 
-	async setTabs() {
-		this.tabs = await chrome.tabs.query({})
-		this.tabsCount = this.tabs.length
-	},
-
 	startCountdown() {
 		let secondsPast = 0
 
@@ -110,5 +112,3 @@ const Procrastabs = {
 		this.syncStorage()
 	},
 }
-
-Procrastabs.init()
