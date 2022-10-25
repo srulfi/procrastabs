@@ -64,6 +64,8 @@ const Popup = {
 
 		this.$countdownInput.addEventListener("change", () => {
 			const countdownInSeconds = this.$countdownInput.value * 60
+
+			this.resetMessage()
 			this.setStorageItems({ countdown: countdownInSeconds })
 		})
 
