@@ -140,4 +140,4 @@ const Procrastabs = {
 	},
 }
 
-chrome.runtime.onInstalled.addListener(() => Procrastabs.init())
+Procrastabs.init()
