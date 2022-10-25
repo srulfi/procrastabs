@@ -1,7 +1,5 @@
 const BADGE_COLOR = "#90EE90"
 
-chrome.runtime.onInstalled.addListener(() => Procrastabs.init())
-
 const Procrastabs = {
 	tabs: [],
 	tabsCount: 0,
@@ -84,22 +82,21 @@ const Procrastabs = {
 
 	setStorageSyncListener() {
 		chrome.storage.onChanged.addListener((changes) => {
-			const changesArray = Object.entries(changes)
-			const [key, { newValue }] = changesArray[0]
+			for (let [key, { newValue }] of Object.entries(changes)) {
+				this.config[key] = newValue
 
-			this.config[key] = newValue
-
-			if (key === "countdownEnabled") {
-				if (newValue) {
-					this.startCountdown()
-				} else {
-					clearInterval(this.countdownInterval)
+				if (key === "countdownEnabled") {
+					if (newValue) {
+						this.startCountdown()
+					} else {
+						clearInterval(this.countdownInterval)
+					}
+				} else if (
+					key === "maxTabsEnabled" ||
+					(key === "maxTabs" && this.config.maxTabsEnabled)
+				) {
+					this.updateBadge()
 				}
-			} else if (
-				key === "maxTabsEnabled" ||
-				(key === "maxTabs" && this.config.maxTabsEnabled)
-			) {
-				this.updateBadge()
 			}
 		})
 	},
@@ -142,3 +139,5 @@ const Procrastabs = {
 		this.syncStorage()
 	},
 }
+
+chrome.runtime.onInstalled.addListener(() => Procrastabs.init())
