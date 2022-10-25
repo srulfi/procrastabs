@@ -95,7 +95,10 @@ const Procrastabs = {
 				} else {
 					clearInterval(this.countdownInterval)
 				}
-			} else if (key === "maxTabsEnabled") {
+			} else if (
+				key === "maxTabsEnabled" ||
+				(key === "maxTabs" && this.config.maxTabsEnabled)
+			) {
 				this.updateBadge()
 			}
 		})
