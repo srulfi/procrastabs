@@ -36,42 +36,47 @@ const Popup = {
 
 	setEventListeners() {
 		this.$maxTabsInput.addEventListener("change", () => {
-			const maxTabs = parseInt(this.$maxTabsInput.value)
-
-			if (maxTabs < this.tabsCount) {
-				this.$maxTabsSwitch.checked = false
-				chrome.storage.sync.set({ maxTabsEnabled: false })
+			if (this.hasExtraTabs()) {
+				this.disableMaxTabs()
+				this.disableCountdown()
 			}
 
 			this.resetMessage()
-
-			chrome.storage.sync.set({ maxTabs })
+			chrome.storage.sync.set({ maxTabs: parseInt(this.$maxTabsInput.value) })
 		})
 
 		this.$maxTabsSwitch.addEventListener("change", () => {
-			if (
-				this.$maxTabsInput.value < this.tabsCount &&
-				this.$maxTabsSwitch.checked
-			) {
-				this.$maxTabsSwitch.checked = false
-				this.updateMessage()
+			if (this.$maxTabsSwitch.checked) {
+				if (this.hasExtraTabs()) {
+					this.disableMaxTabs()
+					this.updateMessage()
+				} else {
+					this.enableMaxTabs()
+				}
 			} else {
+				this.disableMaxTabs()
+				this.disableCountdown()
 				this.resetMessage()
 			}
-
-			chrome.storage.sync.set({ maxTabsEnabled: this.$maxTabsSwitch.checked })
 		})
 
 		this.$countdownInput.addEventListener("change", () => {
 			const countdownInSeconds = this.$countdownInput.value * 60
-
 			chrome.storage.sync.set({ countdown: countdownInSeconds })
 		})
 
 		this.$countdownSwitch.addEventListener("change", () => {
-			chrome.storage.sync.set({
-				countdownEnabled: this.$countdownSwitch.checked,
-			})
+			if (this.$countdownSwitch.checked) {
+				if (this.hasExtraTabs()) {
+					this.disableCountdown()
+					this.updateMessage()
+				} else {
+					this.enableCountdown()
+					this.enableMaxTabs()
+				}
+			} else {
+				this.disableCountdown()
+			}
 		})
 	},
 
@@ -86,6 +91,30 @@ const Popup = {
 		})
 	},
 
+	enableMaxTabs() {
+		this.$maxTabsSwitch.checked = true
+		chrome.storage.sync.set({ maxTabsEnabled: true })
+	},
+
+	disableMaxTabs() {
+		this.$maxTabsSwitch.checked = false
+		chrome.storage.sync.set({ maxTabsEnabled: false })
+	},
+
+	enableCountdown() {
+		this.$countdownSwitch.checked = true
+		chrome.storage.sync.set({ countdownEnabled: true })
+	},
+
+	disableCountdown() {
+		this.$countdownSwitch.checked = false
+		chrome.storage.sync.set({ countdownEnabled: false })
+	},
+
+	hasExtraTabs() {
+		return parseInt(this.$maxTabsInput.value) < this.tabsCount
+	},
+
 	updateMessage() {
 		const extraTabs = this.tabsCount - this.$maxTabsInput.value
 		const tabText = extraTabs > 1 ? "tabs" : "tab"
@@ -98,6 +127,4 @@ const Popup = {
 	},
 }
 
-window.onload = () => {
-	Popup.init()
-}
+window.onload = () => Popup.init()
