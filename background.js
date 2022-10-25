@@ -1,3 +1,5 @@
+const BADGE_COLOR = "#90EE90"
+
 chrome.runtime.onInstalled.addListener(() => Procrastabs.init())
 
 const Procrastabs = {
@@ -93,6 +95,8 @@ const Procrastabs = {
 				} else {
 					clearInterval(this.countdownInterval)
 				}
+			} else if (key === "maxTabsEnabled") {
+				this.updateBadge()
 			}
 		})
 	},
@@ -115,8 +119,15 @@ const Procrastabs = {
 	},
 
 	updateBadge() {
-		chrome.action.setBadgeText({ text: this.tabsCount.toString() })
-		chrome.action.setBadgeBackgroundColor({ color: "#9688F1" })
+		const color = BADGE_COLOR
+		const tabsRemaining = this.config.maxTabs - this.tabsCount
+		const tabsRemainingText = tabsRemaining === 0 ? "0" : `-${tabsRemaining}`
+		const text = this.config.maxTabsEnabled
+			? tabsRemainingText
+			: this.tabsCount.toString()
+
+		chrome.action.setBadgeBackgroundColor({ color })
+		chrome.action.setBadgeText({ text })
 	},
 
 	syncStorage() {
