@@ -1,4 +1,5 @@
 const BADGE_COLOR = "#90EE90"
+const BADGE_COUNTDOWN_COLOR = "#B81D13"
 
 const Procrastabs = {
 	tabs: [],
@@ -105,12 +106,20 @@ const Procrastabs = {
 		let secondsPast = 0
 
 		this.countdownInterval = setInterval(() => {
-			if (++secondsPast === this.config.countdown) {
+			const timeRemaining = this.config.countdown - secondsPast
+
+			if (secondsPast === this.config.countdown) {
 				if (this.tabsCount === this.config.maxTabs && this.activeTabId) {
 					this.removeTab(this.activeTabId)
 				}
+
+				this.updateBadge()
 				clearInterval(this.countdownInterval)
+			} else if (timeRemaining <= 10) {
+				this.setBadgeColor(BADGE_COUNTDOWN_COLOR)
+				this.setBadgeText(timeRemaining.toString())
 			}
+			secondsPast += 1
 		}, 1000)
 	},
 
@@ -119,15 +128,22 @@ const Procrastabs = {
 	},
 
 	updateBadge() {
-		const color = BADGE_COLOR
 		const tabsRemaining = this.config.maxTabs - this.tabsCount
 		const tabsRemainingText = tabsRemaining === 0 ? "0" : `-${tabsRemaining}`
 		const text = this.config.maxTabsEnabled
 			? tabsRemainingText
 			: this.tabsCount.toString()
 
-		chrome.action.setBadgeBackgroundColor({ color })
+		this.setBadgeText(text)
+		this.setBadgeColor(BADGE_COLOR)
+	},
+
+	setBadgeText(text) {
 		chrome.action.setBadgeText({ text })
+	},
+
+	setBadgeColor(color) {
+		chrome.action.setBadgeBackgroundColor({ color })
 	},
 
 	syncStorage() {
