@@ -40,6 +40,10 @@ const Procrastabs = {
 		this.config = config
 		this.config.tabsCount = this.tabsCount
 
+		if (config.countdownEnabled && !this.hasTabsLeft()) {
+			this.startCountdown()
+		}
+
 		await chrome.storage.sync.set(config)
 	},
 
@@ -57,7 +61,7 @@ const Procrastabs = {
 			if (
 				this.config.maxTabsEnabled &&
 				this.config.countdownEnabled &&
-				this.tabsCount === this.config.maxTabs
+				!this.hasTabsLeft()
 			) {
 				this.startCountdown()
 			}
@@ -109,7 +113,7 @@ const Procrastabs = {
 			const timeRemaining = this.config.countdown - secondsPast
 
 			if (secondsPast === this.config.countdown) {
-				if (this.tabsCount === this.config.maxTabs && this.activeTabId) {
+				if (!this.hasTabsLeft() && this.activeTabId) {
 					this.removeTab(this.activeTabId)
 				}
 
@@ -153,6 +157,10 @@ const Procrastabs = {
 	runSync() {
 		this.updateBadge()
 		this.syncStorage()
+	},
+
+	hasTabsLeft() {
+		return this.tabsCount < this.config.maxTabs
 	},
 }
 
