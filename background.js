@@ -1,5 +1,6 @@
 const BADGE_COLOR = "#90EE90"
 const BADGE_COUNTDOWN_COLOR = "#B81D13"
+const BADGE_COUNTDOWN_SECONDS = 60
 
 const Procrastabs = {
 	tabs: [],
@@ -17,11 +18,11 @@ const Procrastabs = {
 
 	async init() {
 		await this.setTabs()
-		await this.setPersistedConfig()
+		await this.getPersistedConfig()
 
 		this.setTabsListeners()
 		this.setStorageSyncListener()
-		this.updateBadge()
+		this.runSync()
 	},
 
 	async setTabs() {
@@ -29,7 +30,7 @@ const Procrastabs = {
 		this.tabsCount = this.tabs.length
 	},
 
-	async setPersistedConfig() {
+	async getPersistedConfig() {
 		const config = await chrome.storage.sync.get([
 			"maxTabs",
 			"maxTabsEnabled",
@@ -37,14 +38,16 @@ const Procrastabs = {
 			"countdownEnabled",
 		])
 
-		this.config = config
-		this.config.tabsCount = this.tabsCount
-
-		if (config.countdownEnabled && !this.hasTabsLeft()) {
-			this.startCountdown()
+		if (config.countdownEnabled) {
+			if (this.tabsCount === config.maxTabs) {
+				this.startCountdown()
+			} else if (this.tabsCount > config.maxTabs) {
+				config.maxTabsEnabled = false
+				config.countdownEnabled = false
+			}
 		}
 
-		await chrome.storage.sync.set(config)
+		this.config = config
 	},
 
 	setTabsListeners() {
@@ -61,7 +64,7 @@ const Procrastabs = {
 			if (
 				this.config.maxTabsEnabled &&
 				this.config.countdownEnabled &&
-				!this.hasTabsLeft()
+				this.hasMaxOpenTabs()
 			) {
 				this.startCountdown()
 			}
@@ -89,42 +92,73 @@ const Procrastabs = {
 		chrome.storage.onChanged.addListener((changes) => {
 			for (let [key, { newValue }] of Object.entries(changes)) {
 				this.config[key] = newValue
+				console.log(key, ": ", newValue)
+				switch (key) {
+					case "maxTabs":
+						if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
+							this.startCountdown()
+						} else if (this.countdownOn) {
+							this.stopCountdown()
+						} else {
+							this.updateBadge()
+						}
+						break
 
-				if (key === "countdownEnabled") {
-					if (newValue) {
-						this.startCountdown()
-					} else {
-						clearInterval(this.countdownInterval)
-					}
-				} else if (
-					key === "maxTabsEnabled" ||
-					(key === "maxTabs" && this.config.maxTabsEnabled)
-				) {
-					this.updateBadge()
+					case "maxTabsEnabled":
+						this.updateBadge()
+						break
+
+					case "countdown":
+						if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
+							this.stopCountdown()
+							this.startCountdown()
+						}
+						break
+
+					case "countdownEnabled":
+						if (newValue) {
+							if (this.hasMaxOpenTabs()) {
+								this.startCountdown()
+							}
+						} else if (this.countdownOn) {
+							this.stopCountdown()
+						}
+						break
+
+					default:
+						break
 				}
 			}
 		})
 	},
 
 	startCountdown() {
-		let secondsPast = 0
+		this.countdownOn = true
 
+		let secondsPast = 0
 		this.countdownInterval = setInterval(() => {
 			const timeRemaining = this.config.countdown - secondsPast
 
 			if (secondsPast === this.config.countdown) {
-				if (!this.hasTabsLeft() && this.activeTabId) {
+				if (this.hasMaxOpenTabs() && this.activeTabId) {
 					this.removeTab(this.activeTabId)
 				}
 
+				this.stopCountdown()
 				this.updateBadge()
-				clearInterval(this.countdownInterval)
-			} else if (timeRemaining <= 10) {
+			} else if (timeRemaining < BADGE_COUNTDOWN_SECONDS) {
 				this.setBadgeColor(BADGE_COUNTDOWN_COLOR)
 				this.setBadgeText(timeRemaining.toString())
 			}
 			secondsPast += 1
 		}, 1000)
+	},
+
+	stopCountdown() {
+		clearInterval(this.countdownInterval)
+
+		this.countdownOn = false
+		this.updateBadge()
 	},
 
 	removeTab(tabId) {
@@ -159,8 +193,8 @@ const Procrastabs = {
 		this.syncStorage()
 	},
 
-	hasTabsLeft() {
-		return this.tabsCount < this.config.maxTabs
+	hasMaxOpenTabs() {
+		return this.tabsCount === this.config.maxTabs
 	},
 }
 

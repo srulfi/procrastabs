@@ -17,7 +17,7 @@ const Popup = {
 		this.setStorageListeners()
 	},
 
-	setConfigFromStorage() {
+	async setConfigFromStorage() {
 		chrome.storage.sync
 			.get([
 				"tabsCount",
@@ -39,24 +39,26 @@ const Popup = {
 	setEventListeners() {
 		this.$maxTabsInput.addEventListener("change", () => {
 			if (this.hasExtraTabs()) {
+				this.setStorageItems({ maxTabsEnabled: false, countdownEnabled: false })
 				this.disableMaxTabs()
 				this.disableCountdown()
 			}
 
-			this.resetMessage()
 			this.setStorageItems({ maxTabs: parseInt(this.$maxTabsInput.value) })
+			this.resetMessage()
 		})
 
 		this.$maxTabsSwitch.addEventListener("change", () => {
 			if (this.$maxTabsSwitch.checked) {
 				if (this.hasExtraTabs()) {
+					this.setStorageItems({ maxTabsEnabled: false })
 					this.disableMaxTabs()
 					this.displayTabsMessage()
 				} else {
-					this.enableMaxTabs()
+					this.setStorageItems({ maxTabsEnabled: true })
 				}
 			} else {
-				this.disableMaxTabs()
+				this.setStorageItems({ maxTabsEnabled: false, countdownEnabled: false })
 				this.disableCountdown()
 				this.resetMessage()
 			}
@@ -65,8 +67,8 @@ const Popup = {
 		this.$countdownInput.addEventListener("change", () => {
 			const countdownInSeconds = this.$countdownInput.value * 60
 
-			this.resetMessage()
 			this.setStorageItems({ countdown: countdownInSeconds })
+			this.resetMessage()
 		})
 
 		this.$countdownSwitch.addEventListener("change", () => {
@@ -75,10 +77,11 @@ const Popup = {
 					this.disableCountdown()
 					this.displayTabsMessage()
 				} else {
-					this.enableCountdown()
+					this.setStorageItems({ maxTabsEnabled: true, countdownEnabled: true })
 					this.enableMaxTabs()
 				}
 			} else {
+				this.setStorageItems({ countdownEnabled: false })
 				this.disableCountdown()
 			}
 		})
@@ -86,11 +89,15 @@ const Popup = {
 
 	setStorageListeners() {
 		chrome.storage.onChanged.addListener((changes) => {
-			const changesArray = Object.entries(changes)
-			const [key, { newValue }] = changesArray[0]
+			for (let [key, { newValue }] of Object.entries(changes)) {
+				switch (key) {
+					case "tabsCount":
+						this.tabsCount = newValue
+						break
 
-			if (key === "tabsCount") {
-				this.tabsCount = newValue
+					default:
+						break
+				}
 			}
 		})
 	},
@@ -103,31 +110,19 @@ const Popup = {
 	},
 
 	enableMaxTabs() {
-		this.setStorageItems(
-			{ maxTabsEnabled: true },
-			() => (this.$maxTabsSwitch.checked = true)
-		)
+		this.$maxTabsSwitch.checked = true
 	},
 
 	disableMaxTabs() {
-		this.setStorageItems(
-			{ maxTabsEnabled: false },
-			() => (this.$maxTabsSwitch.checked = false)
-		)
+		this.$maxTabsSwitch.checked = false
 	},
 
 	enableCountdown() {
-		this.setStorageItems(
-			{ countdownEnabled: true },
-			() => (this.$countdownSwitch.checked = true)
-		)
+		this.$countdownSwitch.checked = true
 	},
 
 	disableCountdown() {
-		this.setStorageItems(
-			{ countdownEnabled: false },
-			() => (this.$countdownSwitch.checked = false)
-		)
+		this.$countdownSwitch.checked = false
 	},
 
 	hasExtraTabs() {
