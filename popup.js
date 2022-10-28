@@ -1,6 +1,3 @@
-const DEFAULT_MAX_TABS = 10
-const DEFAULT_COUNTDOWN = 5
-
 const Popup = {
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
@@ -11,29 +8,31 @@ const Popup = {
 	tabsCount: undefined,
 
 	async init() {
-		await this.setConfigFromStorage()
+		const config = await this.getConfigFromStorage()
+
+		this.tabsCount = config.tabsCount
+		this.$maxTabsInput.value = config.maxTabs
+		this.$maxTabsSwitch.checked = config.maxTabsEnabled
+		this.$countdownInput.value = config.countdown
+		this.$countdownSwitch.checked = config.countdownEnabled
 
 		this.setEventListeners()
 		this.setStorageListeners()
 	},
 
-	async setConfigFromStorage() {
-		chrome.storage.sync
-			.get([
+	async getConfigFromStorage() {
+		try {
+			const config = chrome.storage.sync.get([
 				"tabsCount",
 				"maxTabs",
 				"maxTabsEnabled",
 				"countdown",
 				"countdownEnabled",
 			])
-			.then((config) => {
-				this.tabsCount = config.tabsCount
-				this.$maxTabsInput.value = config.maxTabs || DEFAULT_MAX_TABS
-				this.$maxTabsSwitch.checked = config.maxTabsEnabled || false
-				this.$countdownInput.value = config.countdown / 60 || DEFAULT_COUNTDOWN
-				this.$countdownSwitch.checked = config.countdownEnabled || false
-			})
-			.catch((e) => this.displayErrorMessage(e))
+			return config
+		} catch (e) {
+			this.displayErrorMessage(e)
+		}
 	},
 
 	setEventListeners() {
@@ -65,9 +64,7 @@ const Popup = {
 		})
 
 		this.$countdownInput.addEventListener("change", () => {
-			const countdownInSeconds = this.$countdownInput.value * 60
-
-			this.setStorageItems({ countdown: countdownInSeconds })
+			this.setStorageItems({ countdown: Number(this.$countdownInput.value) })
 			this.resetMessage()
 		})
 
@@ -126,7 +123,7 @@ const Popup = {
 	},
 
 	hasExtraTabs() {
-		return parseInt(this.$maxTabsInput.value) < this.tabsCount
+		return Number(this.$maxTabsInput.value) < this.tabsCount
 	},
 
 	displayErrorMessage(e) {

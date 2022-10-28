@@ -1,8 +1,6 @@
-const BADGE_COLOR = "#90EE90"
-const BADGE_COUNTDOWN_COLOR = "#B81D13"
-const BADGE_COUNTDOWN_SECONDS = 60
+import defaults from "./defaults.js"
 
-const Procrastabs = {
+const ProcrastabsManager = {
 	tabs: [],
 	tabsCount: 0,
 	activeTabId: undefined,
@@ -10,44 +8,60 @@ const Procrastabs = {
 	bypassSync: false,
 
 	config: {
-		maxTabs: undefined,
-		maxTabsEnabled: false,
-		countdown: undefined,
-		countdownEnabled: false,
+		badgeBaseColor: defaults.badge.baseColor,
+		badgeCountdownColor: defaults.badge.countdownColor,
+		badgeCountdownSeconds: defaults.badge.countdownSeconds,
+		badgeCountdownEnabled: defaults.badge.countdownEnabled,
+		maxTabs: defaults.maxTabs.value,
+		maxTabsEnabled: defaults.maxTabs.enabled,
+		countdown: defaults.countdown.value,
+		countdownEnabled: defaults.countdown.enabled,
 	},
 
 	async init() {
-		await this.setTabs()
-		await this.getPersistedConfig()
+		this.tabs = await this.queryTabs()
+		this.tabsCount = this.tabs.length
+
+		const config = await this.getConfigFromStorage()
+
+		if (config.countdownEnabled && this.tabsCount > config.maxTabs) {
+			config.maxTabsEnabled = false
+			config.countdownEnabled = false
+		}
+
+		this.config = { ...this.config, ...config }
 
 		this.setTabsListeners()
 		this.setStorageSyncListener()
-		this.runSync()
-	},
 
-	async setTabs() {
-		this.tabs = await chrome.tabs.query({})
-		this.tabsCount = this.tabs.length
-	},
+		await this.syncWithClient()
 
-	async getPersistedConfig() {
-		const config = await chrome.storage.sync.get([
-			"maxTabs",
-			"maxTabsEnabled",
-			"countdown",
-			"countdownEnabled",
-		])
-
-		if (config.countdownEnabled) {
-			if (this.tabsCount === config.maxTabs) {
-				this.startCountdown()
-			} else if (this.tabsCount > config.maxTabs) {
-				config.maxTabsEnabled = false
-				config.countdownEnabled = false
-			}
+		if (config.countdownEnabled && this.tabsCount === config.maxTabs) {
+			this.startCountdown()
 		}
+	},
 
-		this.config = config
+	async queryTabs() {
+		try {
+			const tabs = await chrome.tabs.query({})
+			return tabs
+		} catch (e) {
+			throw new Error(e.message)
+		}
+	},
+
+	async getConfigFromStorage() {
+		try {
+			const config = await chrome.storage.sync.get([
+				"maxTabs",
+				"maxTabsEnabled",
+				"countdown",
+				"countdownEnabled",
+			])
+			return config
+		} catch (e) {
+			console.error(e)
+		}
 	},
 
 	setTabsListeners() {
@@ -58,7 +72,7 @@ const Procrastabs = {
 				this.bypassSync = true
 				this.removeTab(tab.id)
 			} else {
-				this.runSync()
+				this.syncTabsWithClient()
 			}
 
 			if (
@@ -74,7 +88,7 @@ const Procrastabs = {
 			this.tabsCount -= 1
 
 			if (!this.bypassSync) {
-				this.runSync()
+				this.syncTabsWithClient()
 			}
 
 			this.bypassSync = false
@@ -92,7 +106,7 @@ const Procrastabs = {
 		chrome.storage.onChanged.addListener((changes) => {
 			for (let [key, { newValue }] of Object.entries(changes)) {
 				this.config[key] = newValue
-				console.log(key, ": ", newValue)
+
 				switch (key) {
 					case "maxTabs":
 						if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
@@ -133,21 +147,25 @@ const Procrastabs = {
 	},
 
 	startCountdown() {
-		this.countdownOn = true
-
+		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
-		this.countdownInterval = setInterval(() => {
-			const timeRemaining = this.config.countdown - secondsPast
 
-			if (secondsPast === this.config.countdown) {
+		this.countdownOn = true
+		this.countdownInterval = setInterval(() => {
+			const timeRemaining = countdownInSeconds - secondsPast
+
+			if (secondsPast === countdownInSeconds) {
 				if (this.hasMaxOpenTabs() && this.activeTabId) {
 					this.removeTab(this.activeTabId)
 				}
 
 				this.stopCountdown()
 				this.updateBadge()
-			} else if (timeRemaining < BADGE_COUNTDOWN_SECONDS) {
-				this.setBadgeColor(BADGE_COUNTDOWN_COLOR)
+			} else if (
+				this.config.badgeCountdownEnabled &&
+				timeRemaining < this.config.badgeCountdownSeconds
+			) {
+				this.setBadgeColor(this.config.badgeCountdownColor)
 				this.setBadgeText(timeRemaining.toString())
 			}
 			secondsPast += 1
@@ -173,7 +191,7 @@ const Procrastabs = {
 			: this.tabsCount.toString()
 
 		this.setBadgeText(text)
-		this.setBadgeColor(BADGE_COLOR)
+		this.setBadgeColor(this.config.badgeBaseColor)
 	},
 
 	setBadgeText(text) {
@@ -184,13 +202,28 @@ const Procrastabs = {
 		chrome.action.setBadgeBackgroundColor({ color })
 	},
 
-	syncStorage() {
-		chrome.storage.sync.set({ tabsCount: this.tabsCount })
+	async syncTabsWithClient() {
+		try {
+			await chrome.storage.sync.set({ tabsCount: this.tabsCount })
+			this.updateBadge()
+		} catch (e) {
+			console.error(e)
+		}
 	},
 
-	runSync() {
-		this.updateBadge()
-		this.syncStorage()
+	async syncWithClient() {
+		try {
+			await chrome.storage.sync.set({
+				tabsCount: this.tabsCount,
+				maxTabs: this.config.maxTabs,
+				maxTabsEnabled: this.config.maxTabsEnabled,
+				countdown: this.config.countdown,
+				countdownEnabled: this.config.countdownEnabled,
+			})
+			this.updateBadge()
+		} catch (e) {
+			console.error(e)
+		}
 	},
 
 	hasMaxOpenTabs() {
@@ -198,4 +231,4 @@ const Procrastabs = {
 	},
 }
 
-Procrastabs.init()
+ProcrastabsManager.init()
