@@ -10,7 +10,7 @@ export default {
 		enabled: false,
 	},
 	countdown: {
-		value: 1,
+		value: 5,
 		enabled: false,
 	},
 }
