@@ -24,7 +24,9 @@ const ProcrastabsManager = {
 
 		const config = await this.getConfigFromStorage()
 
-		if (config.countdownEnabled && this.tabsCount > config.maxTabs) {
+		if (!config.maxTabs) {
+			config.maxTabs = this.tabsCount
+		} else if (config.countdownEnabled && this.tabsCount > config.maxTabs) {
 			config.maxTabsEnabled = false
 			config.countdownEnabled = false
 		}

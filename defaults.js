@@ -6,7 +6,7 @@ export default {
 		countdownEnabled: true,
 	},
 	maxTabs: {
-		value: 10,
+		value: undefined,
 		enabled: false,
 	},
 	countdown: {
