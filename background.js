@@ -234,3 +234,49 @@ const ProcrastabsManager = {
 }
 
 ProcrastabsManager.init()
+
+/*
+	Start of workaround to "persist" service-worker as Chrome terminates all connections after 5 minutes.
+	https://stackoverflow.com/a/66618269
+*/
+let lifeline
+
+chrome.runtime.onConnect.addListener((port) => {
+	if (port.name === "keep-alive") {
+		lifeline = port
+		setTimeout(forceKeepAlive, 295e3) // 5 minutes minus 5 seconds
+		port.onDisconnect.addListener(forceKeepAlive)
+	}
+})
+
+function forceKeepAlive() {
+	lifeline?.disconnect()
+	lifeline = null
+	keepAlive()
+}
+
+async function keepAlive() {
+	if (lifeline) return
+
+	for (const tab of await chrome.tabs.query({ url: "*://*/*" })) {
+		try {
+			await chrome.scripting.executeScript({
+				target: { tabId: tab.id },
+				func: () => chrome.runtime.connect({ name: "keep-alive" }),
+			})
+			chrome.tabs.onUpdated.removeListener(retryOnTabUpdate)
+			return
+		} catch (e) {}
+	}
+
+	chrome.tabs.onUpdated.addListener(retryOnTabUpdate)
+}
+
+async function retryOnTabUpdate(tabId, info, tab) {
+	if (info.url && /^(file|https?):/.test(info.url)) {
+		keepAlive()
+	}
+}
+
+keepAlive()
+/* End of workaround */
