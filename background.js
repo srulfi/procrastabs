@@ -16,6 +16,7 @@ const ProcrastabsManager = {
 		maxTabsEnabled: defaults.maxTabs.enabled,
 		countdown: defaults.countdown.value,
 		countdownEnabled: defaults.countdown.enabled,
+		avoidDuplicates: defaults.avoidDuplicates,
 	},
 
 	async init() {
@@ -38,8 +39,9 @@ const ProcrastabsManager = {
 
 		await this.syncWithClient()
 
-		if (config.countdownEnabled && this.tabsCount === config.maxTabs) {
+		if (config.countdownEnabled && this.tabsCount === this.config.maxTabs) {
 			this.startCountdown()
+			this.updateBadge()
 		}
 	},
 
@@ -80,28 +82,48 @@ const ProcrastabsManager = {
 
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
+			this.tabs.push(tab)
 			this.tabsCount += 1
 
 			if (this.config.maxTabsEnabled && this.tabsCount > this.config.maxTabs) {
+				this.removeTabs([tab.id])
 				this.bypassSync = true
-				this.removeTab(tab.id)
 			} else {
-				this.syncTabsWithClient()
-			}
+				if (this.config.avoidDuplicates) {
+					const duplicatedTabs = this.getDuplicatedTabs(tab)
 
-			if (
-				this.config.maxTabsEnabled &&
-				this.config.countdownEnabled &&
-				this.hasMaxOpenTabs()
-			) {
-				this.startCountdown()
+					if (duplicatedTabs.length) {
+						this.removeTabs(duplicatedTabs.map((duplicate) => duplicate.id))
+						return
+					}
+				}
+
+				if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
+					this.startCountdown()
+				}
+
+				this.syncTabsWithClient()
 			}
 		})
 
-		chrome.tabs.onRemoved.addListener((tab) => {
+		chrome.tabs.onUpdated.addListener((tabId, updates) => {
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.id === tabId) {
+					return { ...tab, ...updates }
+				}
+				return tab
+			})
+		})
+
+		chrome.tabs.onRemoved.addListener((tabId) => {
+			this.tabs = this.tabs.filter((stackTab) => stackTab.id !== tabId)
 			this.tabsCount -= 1
 
-			if (this.config.countdownEnabled && !this.hasMaxOpenTabs()) {
+			if (
+				this.config.countdownEnabled &&
+				!this.hasMaxOpenTabs() &&
+				this.countdownOn
+			) {
 				this.stopCountdown()
 			}
 
@@ -131,9 +153,8 @@ const ProcrastabsManager = {
 							this.startCountdown()
 						} else if (this.countdownOn) {
 							this.stopCountdown()
-						} else {
-							this.updateBadge()
 						}
+						this.updateBadge()
 						break
 
 					case "maxTabsEnabled":
@@ -144,16 +165,17 @@ const ProcrastabsManager = {
 						if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
 							this.stopCountdown()
 							this.startCountdown()
+							this.updateBadge()
 						}
 						break
 
 					case "countdownEnabled":
-						if (newValue) {
-							if (this.hasMaxOpenTabs()) {
-								this.startCountdown()
-							}
-						} else if (this.countdownOn) {
+						if (newValue && this.hasMaxOpenTabs()) {
+							this.startCountdown()
+							this.updateBadge()
+						} else if (!newValue && this.countdownOn) {
 							this.stopCountdown()
+							this.updateBadge()
 						}
 						break
 
@@ -176,18 +198,17 @@ const ProcrastabsManager = {
 			}
 		}
 
-		this.updateBadge()
-
 		this.countdownOn = true
 		this.countdownInterval = setInterval(() => {
 			const timeRemaining = countdownInSeconds - secondsPast
 
 			if (secondsPast === countdownInSeconds) {
 				if (this.hasMaxOpenTabs() && this.activeTabId) {
-					this.removeTab(this.activeTabId)
+					this.removeTabs([this.activeTabId])
 				}
 
 				this.stopCountdown()
+				this.updateBadge()
 			} else if (
 				this.config.badgeCountdownEnabled &&
 				timeRemaining < this.config.badgeCountdownSeconds
@@ -201,13 +222,11 @@ const ProcrastabsManager = {
 
 	stopCountdown() {
 		clearInterval(this.countdownInterval)
-
 		this.countdownOn = false
-		this.updateBadge()
 	},
 
-	removeTab(tabId) {
-		chrome.tabs.remove(tabId)
+	removeTabs(tabIds) {
+		chrome.tabs.remove(tabIds)
 	},
 
 	updateBadge() {
@@ -246,6 +265,7 @@ const ProcrastabsManager = {
 				maxTabsEnabled: this.config.maxTabsEnabled,
 				countdown: this.config.countdown,
 				countdownEnabled: this.config.countdownEnabled,
+				avoidDuplicates: this.config.avoidDuplicates,
 			})
 			this.updateBadge()
 		} catch (e) {
@@ -255,6 +275,18 @@ const ProcrastabsManager = {
 
 	hasMaxOpenTabs() {
 		return this.tabsCount === this.config.maxTabs
+	},
+
+	getDuplicatedTabs(tab) {
+		return this.tabs.filter((stackTab) => {
+			if (
+				stackTab.id !== tab.id &&
+				(stackTab.url === tab.url ||
+					(!tab.url && stackTab.url === "chrome://newtab/"))
+			) {
+				return stackTab
+			}
+		})
 	},
 }
 
