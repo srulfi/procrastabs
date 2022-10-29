@@ -101,6 +101,10 @@ const ProcrastabsManager = {
 		chrome.tabs.onRemoved.addListener((tab) => {
 			this.tabsCount -= 1
 
+			if (this.config.countdownEnabled && !this.hasMaxOpenTabs()) {
+				this.stopCountdown()
+			}
+
 			if (!this.bypassSync) {
 				this.syncTabsWithClient()
 			}
