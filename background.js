@@ -16,7 +16,7 @@ const ProcrastabsManager = {
 		maxTabsEnabled: defaults.maxTabs.enabled,
 		countdown: defaults.countdown.value,
 		countdownEnabled: defaults.countdown.enabled,
-		avoidDuplicates: defaults.avoidDuplicates,
+		closeDuplicates: defaults.closeDuplicates,
 	},
 
 	async init() {
@@ -33,7 +33,7 @@ const ProcrastabsManager = {
 		}
 
 		this.config = { ...this.config, ...config }
-
+		console.log(this.config)
 		this.setTabsListeners()
 		this.setStorageSyncListener()
 
@@ -61,6 +61,7 @@ const ProcrastabsManager = {
 				"maxTabsEnabled",
 				"countdown",
 				"countdownEnabled",
+				"closeDuplicates",
 			])
 			return config
 		} catch (e) {
@@ -89,13 +90,10 @@ const ProcrastabsManager = {
 				this.removeTabs([tab.id])
 				this.bypassSync = true
 			} else {
-				if (this.config.avoidDuplicates) {
-					const duplicatedTabs = this.getDuplicatedTabs(tab)
-
-					if (duplicatedTabs.length) {
-						this.removeTabs(duplicatedTabs.map((duplicate) => duplicate.id))
-						return
-					}
+				if (this.config.closeDuplicates) {
+					this.closeDuplicateTabsOf(tab)
+					this.syncTabsWithClient()
+					return
 				}
 
 				if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
@@ -178,6 +176,12 @@ const ProcrastabsManager = {
 							this.updateBadge()
 						}
 						break
+
+					case "closeDuplicates":
+						if (this.config.closeDuplicates && newValue) {
+							this.closeAllDuplicateTabs()
+							break
+						}
 
 					default:
 						break
@@ -265,7 +269,7 @@ const ProcrastabsManager = {
 				maxTabsEnabled: this.config.maxTabsEnabled,
 				countdown: this.config.countdown,
 				countdownEnabled: this.config.countdownEnabled,
-				avoidDuplicates: this.config.avoidDuplicates,
+				closeDuplicates: this.config.closeDuplicates,
 			})
 			this.updateBadge()
 		} catch (e) {
@@ -277,16 +281,37 @@ const ProcrastabsManager = {
 		return this.tabsCount === this.config.maxTabs
 	},
 
-	getDuplicatedTabs(tab) {
-		return this.tabs.filter((stackTab) => {
+	closeDuplicateTabsOf(tab) {
+		const duplicateTabs = this.tabs.filter((stackTab) => {
 			if (
-				stackTab.id !== tab.id &&
+				(!tab || (tab && stackTab.id !== tab.id)) &&
 				(stackTab.url === tab.url ||
 					(!tab.url && stackTab.url === "chrome://newtab/"))
 			) {
 				return stackTab
 			}
 		})
+
+		if (duplicateTabs.length) {
+			this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
+		}
+	},
+
+	closeAllDuplicateTabs() {
+		const uniqueTabs = []
+		const duplicateTabs = []
+
+		this.tabs.forEach((stackTab) => {
+			if (uniqueTabs.find((uniqueTab) => uniqueTab.url === stackTab.url)) {
+				duplicateTabs.push(stackTab)
+			} else {
+				uniqueTabs.push(stackTab)
+			}
+		})
+
+		if (duplicateTabs.length) {
+			this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
+		}
 	},
 }
 

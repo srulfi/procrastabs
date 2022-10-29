@@ -4,15 +4,29 @@
 	</head>
 	<body>
 		<h1>Procrastabs</h1>
-		<div class="maxtabs-container">
-			<input type="number" id="maxtabs-input" min="1" max="99" />
-			<input type="checkbox" id="maxtabs-switch" />
-			<label for="maxtabs-switch">Toggle Max Tabs</label>
+		<div class="config-option-container">
+			<label for="maxtabs-input" class="config-option-label">Max concurrent tabs:</label>
+			<div class="input-container">
+				<input type="number" id="maxtabs-input" min="1" max="99" />
+				<input type="checkbox" id="maxtabs-switch" />
+				<label for="maxtabs-switch" class="switch-label">Toggle Max Tabs</label>
+				</div>
+			</div>
 		</div>
-		<div class="countdown-container">
-			<input type="number" id="countdown-input" min="1" max="60" />
-			<input type="checkbox" id="countdown-switch" />
-			<label for="countdown-switch">Toggle Countdown</label>
+		<div class="config-option-container">
+			<label for="countdown-input" class="config-option-label">Minutes to close tab:</label>
+			<div class="input-container">
+				<input type="number" id="countdown-input" min="1" max="60" />
+				<input type="checkbox" id="countdown-switch" />
+				<label for="countdown-switch" class="switch-label">Toggle Countdown</label>
+			</div>
+		</div>
+		<div class="config-option-container">
+			<label for="duplicates-switch" class="config-option-label">Close duplicate tabs:</label>
+			<div class="input-container">
+				<input type="checkbox" id="duplicates-switch" />
+				<label for="duplicates-switch" class="switch-label">Toggle Close Duplicates</label>
+			</div>
 		</div>
 		<p id="message"></p>
 		<script src="popup.js"></script>

@@ -13,5 +13,5 @@ export default {
 		value: 5,
 		enabled: false,
 	},
-	avoidDuplicates: false,
+	closeDuplicates: false,
 }

@@ -1,13 +1,30 @@
+body {
+	width: 150px;
+}
+
 h1 {
 	font-size: 14px;
 }
 
-.maxtabs-container,
-.countdown-container {
+.config-option-container {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	margin-bottom: 10px;
+}
+
+.config-option-label {
+	border-top: 1px solid;
+	width: 100%;
+	margin-bottom: 5px;
+	padding-top: 5px;
+	text-align: right;
+}
+
+.input-container {
 	display: flex;
 	flex-direction: row;
-	justify-content: center;
-	margin-top: 10px;
+	justify-content: flex-end;
 }
 
 #maxtabs-input,
@@ -22,7 +39,7 @@ input[type=checkbox] {
   visibility: hidden;
 }
 
-label {
+.switch-label {
   cursor: pointer;
   text-indent: -9999px;
   width: 60px;
@@ -34,7 +51,7 @@ label {
   position: relative;
 }
 
-label:after {
+.switch-label:after {
   content: "";
   position: absolute;
   top: 0px;
@@ -47,16 +64,16 @@ label:after {
   transition: 0.3s;
 }
 
-input:checked + label {
+input:checked + .switch-label {
   background: #bada55;
 }
 
-input:checked + label:after {
+input:checked + .switch-label:after {
   left: calc(100%);
   transform: translateX(-100%);
 }
 
-label:active:after {
+.switch-label:active:after {
   width: 28px;
 }
 
@@ -64,4 +81,5 @@ label:active:after {
 	height: 25px;
 	font-size: 11px;
 	color: red;
+	text-align: right;
 }

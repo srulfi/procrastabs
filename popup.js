@@ -3,6 +3,7 @@ const Popup = {
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
 	$countdownInput: document.querySelector("#countdown-input"),
 	$countdownSwitch: document.querySelector("#countdown-switch"),
+	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
 	$message: document.querySelector("#message"),
 
 	tabsCount: undefined,
@@ -15,6 +16,7 @@ const Popup = {
 		this.$maxTabsSwitch.checked = config.maxTabsEnabled
 		this.$countdownInput.value = config.countdown
 		this.$countdownSwitch.checked = config.countdownEnabled
+		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
 
 		this.setEventListeners()
 		this.setStorageListeners()
@@ -28,6 +30,7 @@ const Popup = {
 				"maxTabsEnabled",
 				"countdown",
 				"countdownEnabled",
+				"closeDuplicates",
 			])
 			return config
 		} catch (e) {
@@ -81,6 +84,12 @@ const Popup = {
 				this.setStorageItems({ countdownEnabled: false })
 				this.disableCountdown()
 			}
+		})
+
+		this.$closeDuplicatesSwitch.addEventListener("change", () => {
+			this.setStorageItems({
+				closeDuplicates: this.$closeDuplicatesSwitch.checked,
+			})
 		})
 	},
 
