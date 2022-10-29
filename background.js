@@ -66,6 +66,18 @@ const ProcrastabsManager = {
 		}
 	},
 
+	async getCurrentTab() {
+		try {
+			const [tab] = await chrome.tabs.query({
+				active: true,
+				lastFocusedWindow: true,
+			})
+			return tab
+		} catch (e) {
+			console.error(e)
+		}
+	},
+
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
 			this.tabsCount += 1
@@ -148,9 +160,17 @@ const ProcrastabsManager = {
 		})
 	},
 
-	startCountdown() {
+	async startCountdown() {
 		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
+
+		if (!this.activeTabId) {
+			const activeTab = await this.getCurrentTab()
+
+			if (activeTab) {
+				this.activeTabId = activeTab.id
+			}
+		}
 
 		this.countdownOn = true
 		this.countdownInterval = setInterval(() => {
