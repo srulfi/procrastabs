@@ -172,6 +172,8 @@ const ProcrastabsManager = {
 			}
 		}
 
+		this.updateBadge()
+
 		this.countdownOn = true
 		this.countdownInterval = setInterval(() => {
 			const timeRemaining = countdownInSeconds - secondsPast
@@ -182,7 +184,6 @@ const ProcrastabsManager = {
 				}
 
 				this.stopCountdown()
-				this.updateBadge()
 			} else if (
 				this.config.badgeCountdownEnabled &&
 				timeRemaining < this.config.badgeCountdownSeconds
