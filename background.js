@@ -91,9 +91,13 @@ const ProcrastabsManager = {
 				this.bypassSync = true
 			} else {
 				if (this.config.closeDuplicates) {
-					this.closeDuplicateTabsOf(tab)
-					this.syncTabsWithClient()
-					return
+					const duplicateTabs = this.getDuplicateTabsOf(tab)
+
+					if (duplicateTabs.length) {
+						this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
+						this.syncTabsWithClient()
+						return
+					}
 				}
 
 				if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
@@ -179,7 +183,7 @@ const ProcrastabsManager = {
 
 					case "closeDuplicates":
 						if (this.config.closeDuplicates && newValue) {
-							this.closeAllDuplicateTabs()
+							this.closeDuplicateTabs()
 							break
 						}
 
@@ -281,7 +285,7 @@ const ProcrastabsManager = {
 		return this.tabsCount === this.config.maxTabs
 	},
 
-	closeDuplicateTabsOf(tab) {
+	getDuplicateTabsOf(tab) {
 		const duplicateTabs = this.tabs.filter((stackTab) => {
 			if (
 				(!tab || (tab && stackTab.id !== tab.id)) &&
@@ -292,12 +296,10 @@ const ProcrastabsManager = {
 			}
 		})
 
-		if (duplicateTabs.length) {
-			this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
-		}
+		return duplicateTabs
 	},
 
-	closeAllDuplicateTabs() {
+	closeDuplicateTabs() {
 		const uniqueTabs = []
 		const duplicateTabs = []
 
