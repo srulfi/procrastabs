@@ -1,9 +1,23 @@
-body {
-	width: 150px;
+thead, tbody {
+	vertical-align: top;
+}
+
+th, td {
+	font-weight: normal;
+	font-size: 11px;
 }
 
 h1 {
 	font-size: 14px;
+}
+
+#parent-container {
+	display: flex;
+	flex-direction: row;
+}
+
+table {
+	width: 250px;
 }
 
 .config-option-container {
@@ -19,6 +33,7 @@ h1 {
 	margin-bottom: 5px;
 	padding-top: 5px;
 	text-align: right;
+	font-size: 11px;
 }
 
 .input-container {
