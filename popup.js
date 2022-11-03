@@ -6,12 +6,10 @@ const Popup = {
 	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
 	$message: document.querySelector("#message"),
 
-	tabsCount: undefined,
-
 	async init() {
 		const config = await this.getConfigFromStorage()
 
-		this.tabsCount = config.tabsCount
+		this.tabs = config.tabs
 		this.$maxTabsInput.value = config.maxTabs
 		this.$maxTabsSwitch.checked = config.maxTabsEnabled
 		this.$countdownInput.value = config.countdown
@@ -25,7 +23,7 @@ const Popup = {
 	async getConfigFromStorage() {
 		try {
 			const config = chrome.storage.sync.get([
-				"tabsCount",
+				"tabs",
 				"maxTabs",
 				"maxTabsEnabled",
 				"countdown",
@@ -97,8 +95,8 @@ const Popup = {
 		chrome.storage.onChanged.addListener((changes) => {
 			for (let [key, { newValue }] of Object.entries(changes)) {
 				switch (key) {
-					case "tabsCount":
-						this.tabsCount = newValue
+					case "tabs":
+						this.tabs = newValue
 						break
 
 					default:
@@ -132,7 +130,7 @@ const Popup = {
 	},
 
 	hasExtraTabs() {
-		return Number(this.$maxTabsInput.value) < this.tabsCount
+		return Number(this.$maxTabsInput.value) < this.tabs.length
 	},
 
 	displayErrorMessage(e) {
@@ -141,7 +139,7 @@ const Popup = {
 	},
 
 	displayTabsMessage() {
-		const extraTabs = this.tabsCount - this.$maxTabsInput.value
+		const extraTabs = this.tabs.length - this.$maxTabsInput.value
 		const tabText = extraTabs > 1 ? "tabs" : "tab"
 
 		this.$message.textContent = `You need to close ${extraTabs} ${tabText}.`

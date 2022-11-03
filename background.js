@@ -2,7 +2,6 @@ import defaults from "./defaults.js"
 
 const ProcrastabsManager = {
 	tabs: [],
-	tabsCount: 0,
 	activeTabId: undefined,
 	activeWindowId: undefined,
 	bypassSync: false,
@@ -20,14 +19,17 @@ const ProcrastabsManager = {
 	},
 
 	async init() {
-		this.tabs = await this.queryTabs()
-		this.tabsCount = this.tabs.length
-
+		const tabs = await this.queryTabs()
+		const activeTab = await this.queryActiveTab()
 		const config = await this.getConfigFromStorage()
 
+		this.tabs = tabs
+		this.activeTabId = activeTab.id
+		this.activeWindowId = activeTab.windowId
+
 		if (!config.maxTabs) {
-			config.maxTabs = this.tabsCount
-		} else if (config.countdownEnabled && this.tabsCount > config.maxTabs) {
+			config.maxTabs = this.tabs.length
+		} else if (config.countdownEnabled && this.tabs.length > config.maxTabs) {
 			config.maxTabsEnabled = false
 			config.countdownEnabled = false
 		}
@@ -35,11 +37,12 @@ const ProcrastabsManager = {
 		this.config = { ...this.config, ...config }
 		console.log(this.config)
 		this.setTabsListeners()
+		this.setWindowsListeners()
 		this.setStorageSyncListener()
 
 		await this.syncWithClient()
 
-		if (config.countdownEnabled && this.tabsCount === this.config.maxTabs) {
+		if (config.countdownEnabled && this.tabs.length === this.config.maxTabs) {
 			this.startCountdown()
 			this.updateBadge()
 		}
@@ -48,9 +51,27 @@ const ProcrastabsManager = {
 	async queryTabs() {
 		try {
 			const tabs = await chrome.tabs.query({})
-			return tabs
+			return tabs.map((tab) => ({
+				id: tab.id,
+				windowId: tab.windowId,
+				title: tab.title,
+				url: tab.url,
+				active: tab.active,
+			}))
 		} catch (e) {
 			throw new Error(e.message)
+		}
+	},
+
+	async queryActiveTab() {
+		try {
+			const [tab] = await chrome.tabs.query({
+				active: true,
+				lastFocusedWindow: true,
+			})
+			return tab
+		} catch (e) {
+			console.error(e)
 		}
 	},
 
@@ -69,24 +90,14 @@ const ProcrastabsManager = {
 		}
 	},
 
-	async getCurrentTab() {
-		try {
-			const [tab] = await chrome.tabs.query({
-				active: true,
-				lastFocusedWindow: true,
-			})
-			return tab
-		} catch (e) {
-			console.error(e)
-		}
-	},
-
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
 			this.tabs.push(tab)
-			this.tabsCount += 1
 
-			if (this.config.maxTabsEnabled && this.tabsCount > this.config.maxTabs) {
+			if (
+				this.config.maxTabsEnabled &&
+				this.tabs.length > this.config.maxTabs
+			) {
 				this.removeTabs([tab.id])
 				this.bypassSync = true
 			} else {
@@ -119,7 +130,6 @@ const ProcrastabsManager = {
 
 		chrome.tabs.onRemoved.addListener((tabId) => {
 			this.tabs = this.tabs.filter((stackTab) => stackTab.id !== tabId)
-			this.tabsCount -= 1
 
 			if (
 				this.config.countdownEnabled &&
@@ -141,6 +151,17 @@ const ProcrastabsManager = {
 
 			this.activeTabId = tabId
 			this.windowTabId = windowId
+		})
+	},
+
+	setWindowsListeners() {
+		chrome.windows.onFocusChanged.addListener(async (windowId) => {
+			if (windowId !== -1) {
+				const { id } = await this.queryActiveTab()
+
+				this.activeTabId = id
+				this.activeWindowId = windowId
+			}
 		})
 	},
 
@@ -199,7 +220,7 @@ const ProcrastabsManager = {
 		let secondsPast = 0
 
 		if (!this.activeTabId) {
-			const activeTab = await this.getCurrentTab()
+			const activeTab = await this.queryActiveTab()
 
 			if (activeTab) {
 				this.activeTabId = activeTab.id
@@ -238,11 +259,11 @@ const ProcrastabsManager = {
 	},
 
 	updateBadge() {
-		const tabsRemaining = this.config.maxTabs - this.tabsCount
+		const tabsRemaining = this.config.maxTabs - this.tabs.length
 		const tabsRemainingText = tabsRemaining === 0 ? "0" : `-${tabsRemaining}`
 		const text = this.config.maxTabsEnabled
 			? tabsRemainingText
-			: this.tabsCount.toString()
+			: this.tabs.length.toString()
 
 		this.setBadgeText(text)
 		this.setBadgeColor(this.config.badgeBaseColor)
@@ -258,7 +279,7 @@ const ProcrastabsManager = {
 
 	async syncTabsWithClient() {
 		try {
-			await chrome.storage.sync.set({ tabsCount: this.tabsCount })
+			await chrome.storage.sync.set({ tabs: this.tabs })
 			this.updateBadge()
 		} catch (e) {
 			console.error(e)
@@ -268,7 +289,7 @@ const ProcrastabsManager = {
 	async syncWithClient() {
 		try {
 			await chrome.storage.sync.set({
-				tabsCount: this.tabsCount,
+				tabs: this.tabs,
 				maxTabs: this.config.maxTabs,
 				maxTabsEnabled: this.config.maxTabsEnabled,
 				countdown: this.config.countdown,
@@ -282,7 +303,7 @@ const ProcrastabsManager = {
 	},
 
 	hasMaxOpenTabs() {
-		return this.tabsCount === this.config.maxTabs
+		return this.tabs.length === this.config.maxTabs
 	},
 
 	getDuplicateTabsOf(tab) {
