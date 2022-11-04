@@ -35,7 +35,9 @@ const ProcrastabsManager = {
 		}
 
 		this.config = { ...this.config, ...config }
-		console.log(this.config)
+		console.log("config: ", this.config)
+
+		this.setTabsTimestamps()
 		this.setTabsListeners()
 		this.setWindowsListeners()
 		this.setStorageSyncListener()
@@ -90,19 +92,39 @@ const ProcrastabsManager = {
 		}
 	},
 
+	setTabsTimestamps() {
+		this.tabs = this.tabs.map((tab) => {
+			if (tab.id === this.activeTabId && tab.windowId === this.activeWindowId) {
+				tab.activeStart = Date.now()
+			}
+
+			return {
+				...tab,
+				createdAt: Date.now(),
+				activeDuration: 0,
+			}
+		})
+	},
+
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
-			this.tabs.push(tab)
+			const newTab = {
+				...tab,
+				createdAt: Date.now(),
+				activeDuration: 0,
+			}
+
+			this.tabs.push(newTab)
 
 			if (
 				this.config.maxTabsEnabled &&
 				this.tabs.length > this.config.maxTabs
 			) {
-				this.removeTabs([tab.id])
+				this.removeTabs([newTab.id])
 				this.bypassSync = true
 			} else {
 				if (this.config.closeDuplicates) {
-					const duplicateTabs = this.getDuplicateTabsOf(tab)
+					const duplicateTabs = this.getDuplicateTabsOf(newTab)
 
 					if (duplicateTabs.length) {
 						this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
@@ -122,10 +144,16 @@ const ProcrastabsManager = {
 		chrome.tabs.onUpdated.addListener((tabId, updates) => {
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
+					if (tab.active && updates.url) {
+						tab.activeStart = Date.now()
+						tab.activeDuration = 0
+					}
 					return { ...tab, ...updates }
 				}
 				return tab
 			})
+
+			this.syncTabsWithClient()
 		})
 
 		chrome.tabs.onRemoved.addListener((tabId) => {
@@ -148,9 +176,22 @@ const ProcrastabsManager = {
 
 		chrome.tabs.onActivated.addListener((activeInfo) => {
 			const { tabId, windowId } = activeInfo
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.url) {
+					if (tab.id === this.activeTabId && tab.activeStart) {
+						tab.activeDuration += Date.now() - tab.activeStart
+						tab.activeStart = null
+					} else if (tab.id === tabId) {
+						tab.activeStart = Date.now()
+					}
+				}
+				return tab
+			})
 
 			this.activeTabId = tabId
 			this.windowTabId = windowId
+
+			this.syncTabsWithClient()
 		})
 	},
 

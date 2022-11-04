@@ -1,4 +1,7 @@
+const milliToMin = (milliseconds) => Math.round(milliseconds / 1000 / 60)
+
 const Popup = {
+	$tabsTrackerTable: document.querySelector("#tabs-tracker"),
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
 	$countdownInput: document.querySelector("#countdown-input"),
@@ -18,6 +21,7 @@ const Popup = {
 
 		this.setEventListeners()
 		this.setStorageListeners()
+		this.populateTracker()
 	},
 
 	async getConfigFromStorage() {
@@ -97,6 +101,7 @@ const Popup = {
 				switch (key) {
 					case "tabs":
 						this.tabs = newValue
+						this.populateTracker()
 						break
 
 					default:
@@ -111,6 +116,27 @@ const Popup = {
 			.set(items)
 			.then(callback)
 			.catch((e) => this.displayErrorMessage(e))
+	},
+
+	populateTracker() {
+		this.$tabsTrackerTable.replaceChildren()
+		this.tabs.forEach((tab, index) => {
+			const row = this.$tabsTrackerTable.insertRow(index)
+
+			const urlCell = row.insertCell(0)
+			const timeOpenCell = row.insertCell(1)
+			const usageCell = row.insertCell(2)
+
+			const url = tab.url
+			const timeOpen = milliToMin(Date.now() - tab.createdAt)
+			const usage = tab.activeStart
+				? milliToMin(Date.now() - tab.activeStart)
+				: milliToMin(tab.activeDuration)
+
+			urlCell.appendChild(document.createTextNode(url))
+			timeOpenCell.appendChild(document.createTextNode(timeOpen))
+			usageCell.appendChild(document.createTextNode(usage))
+		})
 	},
 
 	enableMaxTabs() {
