@@ -197,12 +197,30 @@ const ProcrastabsManager = {
 
 	setWindowsListeners() {
 		chrome.windows.onFocusChanged.addListener(async (windowId) => {
-			if (windowId !== -1) {
+			if (windowId === -1) {
+				// All Chrome Windows have lost focus
+				this.tabs = this.tabs.map((tab) => {
+					if (tab.activeAt) {
+						tab.activeDuration += Date.now() - tab.activeAt
+						tab.activeAt = null
+					}
+					return tab
+				})
+			} else {
 				const { id } = await this.queryActiveTab()
+
+				this.tabs = this.tabs.map((tab) => {
+					if (tab.id === id) {
+						tab.activeAt = Date.now()
+					}
+					return tab
+				})
 
 				this.activeTabId = id
 				this.activeWindowId = windowId
 			}
+
+			this.syncTabsWithClient()
 		})
 	},
 
