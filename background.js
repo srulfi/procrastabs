@@ -95,7 +95,7 @@ const ProcrastabsManager = {
 	setTabsTimestamps() {
 		this.tabs = this.tabs.map((tab) => {
 			if (tab.id === this.activeTabId && tab.windowId === this.activeWindowId) {
-				tab.activeStart = Date.now()
+				tab.activeAt = Date.now()
 			}
 
 			return {
@@ -145,7 +145,7 @@ const ProcrastabsManager = {
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					if (tab.active && updates.url) {
-						tab.activeStart = Date.now()
+						tab.activeAt = Date.now()
 						tab.activeDuration = 0
 					}
 					return { ...tab, ...updates }
@@ -178,11 +178,11 @@ const ProcrastabsManager = {
 			const { tabId, windowId } = activeInfo
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.url) {
-					if (tab.id === this.activeTabId && tab.activeStart) {
-						tab.activeDuration += Date.now() - tab.activeStart
-						tab.activeStart = null
+					if (tab.id === this.activeTabId && tab.activeAt) {
+						tab.activeDuration += Date.now() - tab.activeAt
+						tab.activeAt = null
 					} else if (tab.id === tabId) {
-						tab.activeStart = Date.now()
+						tab.activeAt = Date.now()
 					}
 				}
 				return tab

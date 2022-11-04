@@ -1,4 +1,4 @@
-const milliToMin = (milliseconds) => Math.round(milliseconds / 1000 / 60)
+const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
 
 const Popup = {
 	$tabsTrackerTable: document.querySelector("#tabs-tracker"),
@@ -22,6 +22,7 @@ const Popup = {
 		this.setEventListeners()
 		this.setStorageListeners()
 		this.populateTracker()
+		this.setTrackerInterval()
 	},
 
 	async getConfigFromStorage() {
@@ -129,14 +130,18 @@ const Popup = {
 
 			const url = tab.url
 			const timeOpen = milliToMin(Date.now() - tab.createdAt)
-			const usage = tab.activeStart
-				? milliToMin(Date.now() - tab.activeStart)
+			const usage = tab.activeAt
+				? milliToMin(Date.now() - tab.activeAt)
 				: milliToMin(tab.activeDuration)
 
 			urlCell.appendChild(document.createTextNode(url))
 			timeOpenCell.appendChild(document.createTextNode(timeOpen))
 			usageCell.appendChild(document.createTextNode(usage))
 		})
+	},
+
+	setTrackerInterval() {
+		this.trackerInterval = setInterval(() => this.populateTracker(), 20000)
 	},
 
 	enableMaxTabs() {
