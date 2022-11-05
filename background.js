@@ -2,8 +2,6 @@ import defaults from "./defaults.js"
 
 const ProcrastabsManager = {
 	tabs: [],
-	activeTabId: undefined,
-	activeWindowId: undefined,
 	bypassSync: false,
 
 	config: {
@@ -20,20 +18,16 @@ const ProcrastabsManager = {
 
 	async init() {
 		const tabs = await this.queryTabs()
-		const activeTab = await this.queryActiveTab()
 		const config = await this.getConfigFromStorage()
 
-		this.tabs = tabs
-		this.activeTabId = activeTab.id
-		this.activeWindowId = activeTab.windowId
-
 		if (!config.maxTabs) {
-			config.maxTabs = this.tabs.length
-		} else if (config.countdownEnabled && this.tabs.length > config.maxTabs) {
+			config.maxTabs = tabs.length
+		} else if (config.countdownEnabled && tabs.length > config.maxTabs) {
 			config.maxTabsEnabled = false
 			config.countdownEnabled = false
 		}
 
+		this.tabs = tabs
 		this.config = { ...this.config, ...config }
 		console.log("config: ", this.config)
 
@@ -92,9 +86,12 @@ const ProcrastabsManager = {
 		}
 	},
 
-	setTabsTimestamps() {
+	async setTabsTimestamps() {
+		const currentTab = await this.queryActiveTab()
+		const { id, windowId } = currentTab
+
 		this.tabs = this.tabs.map((tab) => {
-			if (tab.id === this.activeTabId && tab.windowId === this.activeWindowId) {
+			if (tab.id === id && tab.windowId === windowId) {
 				tab.activeAt = Date.now()
 			}
 
@@ -144,7 +141,7 @@ const ProcrastabsManager = {
 		chrome.tabs.onUpdated.addListener((tabId, updates) => {
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
-					if (tab.active && updates.url) {
+					if (updates.status === "complete") {
 						tab.activeAt = Date.now()
 						tab.activeDuration = 0
 					}
@@ -174,23 +171,10 @@ const ProcrastabsManager = {
 			this.bypassSync = false
 		})
 
-		chrome.tabs.onActivated.addListener((activeInfo) => {
-			const { tabId, windowId } = activeInfo
-			this.tabs = this.tabs.map((tab) => {
-				if (tab.url) {
-					if (tab.id === this.activeTabId && tab.activeAt) {
-						tab.activeDuration += Date.now() - tab.activeAt
-						tab.activeAt = null
-					} else if (tab.id === tabId) {
-						tab.activeAt = Date.now()
-					}
-				}
-				return tab
-			})
+		chrome.tabs.onActivated.addListener(async (activeInfo) => {
+			const { tabId } = activeInfo
 
-			this.activeTabId = tabId
-			this.windowTabId = windowId
-
+			this.updateTimestampsOnTabChange(tabId)
 			this.syncTabsWithClient()
 		})
 	},
@@ -208,16 +192,7 @@ const ProcrastabsManager = {
 				})
 			} else {
 				const { id } = await this.queryActiveTab()
-
-				this.tabs = this.tabs.map((tab) => {
-					if (tab.id === id) {
-						tab.activeAt = Date.now()
-					}
-					return tab
-				})
-
-				this.activeTabId = id
-				this.activeWindowId = windowId
+				this.updateTimestampsOnTabChange(id)
 			}
 
 			this.syncTabsWithClient()
@@ -274,25 +249,31 @@ const ProcrastabsManager = {
 		})
 	},
 
-	async startCountdown() {
+	updateTimestampsOnTabChange(tabId) {
+		this.tabs = this.tabs.map((tab) => {
+			if (tab.id === tabId && !tab.activeAt && tab.url) {
+				tab.activeAt = Date.now()
+			} else if (tab.id !== tabId && tab.activeAt) {
+				tab.activeDuration += Date.now() - tab.activeAt
+				tab.activeAt = null
+			}
+			return tab
+		})
+	},
+
+	startCountdown() {
 		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
 
-		if (!this.activeTabId) {
-			const activeTab = await this.queryActiveTab()
-
-			if (activeTab) {
-				this.activeTabId = activeTab.id
-			}
-		}
-
 		this.countdownOn = true
-		this.countdownInterval = setInterval(() => {
+
+		this.countdownInterval = setInterval(async () => {
 			const timeRemaining = countdownInSeconds - secondsPast
 
 			if (secondsPast === countdownInSeconds) {
-				if (this.hasMaxOpenTabs() && this.activeTabId) {
-					this.removeTabs([this.activeTabId])
+				if (this.hasMaxOpenTabs()) {
+					const { id } = await this.queryActiveTab()
+					this.removeTabs([id])
 				}
 
 				this.stopCountdown()
