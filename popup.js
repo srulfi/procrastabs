@@ -124,19 +124,19 @@ const Popup = {
 		this.tabs.forEach((tab, index) => {
 			const row = this.$tabsTrackerTable.insertRow(index)
 
-			const urlCell = row.insertCell(0)
+			const titleCell = row.insertCell(0)
 			const timeOpenCell = row.insertCell(1)
-			const usageCell = row.insertCell(2)
+			const timeActiveCell = row.insertCell(2)
 
-			const url = tab.url
+			const title = tab.title
 			const timeOpen = milliToMin(Date.now() - tab.createdAt)
-			const usage = tab.activeAt
+			const timeActive = tab.activeAt
 				? milliToMin(Date.now() - tab.activeAt)
-				: milliToMin(tab.activeDuration)
+				: milliToMin(tab.timeActive)
 
-			urlCell.appendChild(document.createTextNode(url))
+			titleCell.appendChild(document.createTextNode(title))
 			timeOpenCell.appendChild(document.createTextNode(timeOpen))
-			usageCell.appendChild(document.createTextNode(usage))
+			timeActiveCell.appendChild(document.createTextNode(timeActive))
 		})
 	},
 

@@ -31,7 +31,7 @@ const ProcrastabsManager = {
 		this.config = { ...this.config, ...config }
 		console.log("config: ", this.config)
 
-		this.setTabsTimestamps()
+		this.registerExistingTabs()
 		this.setTabsListeners()
 		this.setWindowsListeners()
 		this.setStorageSyncListener()
@@ -47,13 +47,7 @@ const ProcrastabsManager = {
 	async queryTabs() {
 		try {
 			const tabs = await chrome.tabs.query({})
-			return tabs.map((tab) => ({
-				id: tab.id,
-				windowId: tab.windowId,
-				title: tab.title,
-				url: tab.url,
-				active: tab.active,
-			}))
+			return tabs
 		} catch (e) {
 			throw new Error(e.message)
 		}
@@ -86,7 +80,7 @@ const ProcrastabsManager = {
 		}
 	},
 
-	async setTabsTimestamps() {
+	async registerExistingTabs() {
 		const currentTab = await this.queryActiveTab()
 		const { id, windowId } = currentTab
 
@@ -98,7 +92,7 @@ const ProcrastabsManager = {
 			return {
 				...tab,
 				createdAt: Date.now(),
-				activeDuration: 0,
+				timeActive: 0,
 			}
 		})
 	},
@@ -108,7 +102,7 @@ const ProcrastabsManager = {
 			const newTab = {
 				...tab,
 				createdAt: Date.now(),
-				activeDuration: 0,
+				timeActive: 0,
 			}
 
 			this.tabs.push(newTab)
@@ -117,20 +111,20 @@ const ProcrastabsManager = {
 				this.config.maxTabsEnabled &&
 				this.tabs.length > this.config.maxTabs
 			) {
-				this.removeTabs([newTab.id])
+				this.removeTabsById([newTab.id])
 				this.bypassSync = true
 			} else {
 				if (this.config.closeDuplicates) {
 					const duplicateTabs = this.getDuplicateTabsOf(newTab)
 
 					if (duplicateTabs.length) {
-						this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
+						this.removeTabsById(duplicateTabs.map((duplicate) => duplicate.id))
 						this.syncTabsWithClient()
 						return
 					}
 				}
 
-				if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
+				if (this.config.countdownEnabled && !this.hasTabsLeft()) {
 					this.startCountdown()
 				}
 
@@ -143,7 +137,6 @@ const ProcrastabsManager = {
 				if (tab.id === tabId) {
 					if (updates.status === "complete") {
 						tab.activeAt = Date.now()
-						tab.activeDuration = 0
 					}
 					return { ...tab, ...updates }
 				}
@@ -158,7 +151,7 @@ const ProcrastabsManager = {
 
 			if (
 				this.config.countdownEnabled &&
-				!this.hasMaxOpenTabs() &&
+				this.hasTabsLeft() &&
 				this.countdownOn
 			) {
 				this.stopCountdown()
@@ -185,7 +178,7 @@ const ProcrastabsManager = {
 				// All Chrome Windows have lost focus
 				this.tabs = this.tabs.map((tab) => {
 					if (tab.activeAt) {
-						tab.activeDuration += Date.now() - tab.activeAt
+						tab.timeActive += Date.now() - tab.activeAt
 						tab.activeAt = null
 					}
 					return tab
@@ -206,7 +199,7 @@ const ProcrastabsManager = {
 
 				switch (key) {
 					case "maxTabs":
-						if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
+						if (this.config.countdownEnabled && !this.hasTabsLeft()) {
 							this.startCountdown()
 						} else if (this.countdownOn) {
 							this.stopCountdown()
@@ -219,7 +212,7 @@ const ProcrastabsManager = {
 						break
 
 					case "countdown":
-						if (this.config.countdownEnabled && this.hasMaxOpenTabs()) {
+						if (this.config.countdownEnabled && !this.hasTabsLeft()) {
 							this.stopCountdown()
 							this.startCountdown()
 							this.updateBadge()
@@ -227,7 +220,7 @@ const ProcrastabsManager = {
 						break
 
 					case "countdownEnabled":
-						if (newValue && this.hasMaxOpenTabs()) {
+						if (newValue && !this.hasTabsLeft()) {
 							this.startCountdown()
 							this.updateBadge()
 						} else if (!newValue && this.countdownOn) {
@@ -252,9 +245,11 @@ const ProcrastabsManager = {
 	updateTimestampsOnTabChange(tabId) {
 		this.tabs = this.tabs.map((tab) => {
 			if (tab.id === tabId && !tab.activeAt && tab.url) {
+				// current active tab
 				tab.activeAt = Date.now()
 			} else if (tab.id !== tabId && tab.activeAt) {
-				tab.activeDuration += Date.now() - tab.activeAt
+				// previous active tab
+				tab.timeActive += Date.now() - tab.activeAt
 				tab.activeAt = null
 			}
 			return tab
@@ -271,9 +266,9 @@ const ProcrastabsManager = {
 			const timeRemaining = countdownInSeconds - secondsPast
 
 			if (secondsPast === countdownInSeconds) {
-				if (this.hasMaxOpenTabs()) {
+				if (!this.hasTabsLeft()) {
 					const { id } = await this.queryActiveTab()
-					this.removeTabs([id])
+					this.removeTabsById([id])
 				}
 
 				this.stopCountdown()
@@ -294,7 +289,7 @@ const ProcrastabsManager = {
 		this.countdownOn = false
 	},
 
-	removeTabs(tabIds) {
+	removeTabsById(tabIds) {
 		chrome.tabs.remove(tabIds)
 	},
 
@@ -317,8 +312,21 @@ const ProcrastabsManager = {
 		chrome.action.setBadgeBackgroundColor({ color })
 	},
 
+	removeExtraPropsFromTabs() {
+		this.tabs = this.tabs.map((tab) => ({
+			id: tab.id,
+			windowId: tab.windowId,
+			title: tab.title,
+			url: tab.url,
+			createdAt: tab.createdAt,
+			activeAt: tab.activeAt,
+			timeActive: tab.timeActive,
+		}))
+	},
+
 	async syncTabsWithClient() {
 		try {
+			this.removeExtraPropsFromTabs()
 			await chrome.storage.sync.set({ tabs: this.tabs })
 			this.updateBadge()
 		} catch (e) {
@@ -328,6 +336,7 @@ const ProcrastabsManager = {
 
 	async syncWithClient() {
 		try {
+			this.removeExtraPropsFromTabs()
 			await chrome.storage.sync.set({
 				tabs: this.tabs,
 				maxTabs: this.config.maxTabs,
@@ -342,8 +351,8 @@ const ProcrastabsManager = {
 		}
 	},
 
-	hasMaxOpenTabs() {
-		return this.tabs.length === this.config.maxTabs
+	hasTabsLeft() {
+		return this.tabs.length < this.config.maxTabs
 	},
 
 	getDuplicateTabsOf(tab) {
@@ -373,7 +382,7 @@ const ProcrastabsManager = {
 		})
 
 		if (duplicateTabs.length) {
-			this.removeTabs(duplicateTabs.map((duplicate) => duplicate.id))
+			this.removeTabsById(duplicateTabs.map((duplicate) => duplicate.id))
 		}
 	},
 }
