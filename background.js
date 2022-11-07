@@ -133,6 +133,7 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onUpdated.addListener((tabId, updates) => {
+			console.log("updated ", tabId, updates)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					if (updates.status === "complete") {
@@ -143,11 +144,27 @@ const ProcrastabsManager = {
 				return tab
 			})
 
+			console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 
-		chrome.tabs.onRemoved.addListener((tabId) => {
-			this.tabs = this.tabs.filter((stackTab) => stackTab.id !== tabId)
+		chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+			const { isWindowClosing, windowId } = removeInfo
+			console.log("removed ", tabId, " - ", windowId)
+			if (isWindowClosing) {
+				this.tabs = this.tabs.filter((tab) => tab.windowId !== windowId)
+			} else {
+				const removedTabIndex = this.tabs.findIndex((tab) => tab.id === tabId)
+
+				this.tabs.splice(removedTabIndex, 1)
+				this.tabs = this.tabs.map((tab) => {
+					if (tab.windowId === windowId && tab.index > removedTabIndex) {
+						tab.index -= 1
+					}
+					return tab
+				})
+			}
+			console.log(this.tabs)
 
 			if (
 				this.config.countdownEnabled &&
@@ -164,16 +181,32 @@ const ProcrastabsManager = {
 			this.bypassSync = false
 		})
 
-		chrome.tabs.onActivated.addListener(async (activeInfo) => {
-			const { tabId } = activeInfo
-
+		chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+			console.log("activated ", tabId)
 			this.updateTimestampsOnTabChange(tabId)
+			this.syncTabsWithClient()
+		})
+
+		chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
+			const { windowId, fromIndex, toIndex } = moveInfo
+			console.log("moved ", tabId, " - ", windowId)
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.id === tabId) {
+					tab.index = toIndex
+				} else if (tab.windowId === windowId && tab.index === toIndex) {
+					tab.index = fromIndex
+				}
+				return tab
+			})
+			console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 	},
 
 	setWindowsListeners() {
 		chrome.windows.onFocusChanged.addListener(async (windowId) => {
+			console.log("window focus, id:", windowId)
+			//console.log(windowId)
 			if (windowId === -1) {
 				// All Chrome Windows have lost focus
 				this.tabs = this.tabs.map((tab) => {
@@ -188,6 +221,7 @@ const ProcrastabsManager = {
 				this.updateTimestampsOnTabChange(id)
 			}
 
+			console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 	},
@@ -316,6 +350,7 @@ const ProcrastabsManager = {
 		this.tabs = this.tabs.map((tab) => ({
 			id: tab.id,
 			windowId: tab.windowId,
+			index: tab.index,
 			title: tab.title,
 			url: tab.url,
 			createdAt: tab.createdAt,
