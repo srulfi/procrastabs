@@ -1,7 +1,7 @@
 const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
 
 const Popup = {
-	$tabsTrackerTable: document.querySelector("#tabs-tracker"),
+	$tabsTrackerTable: document.querySelector("#tabstracker-table"),
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
 	$countdownInput: document.querySelector("#countdown-input"),
@@ -120,23 +120,47 @@ const Popup = {
 	},
 
 	populateTracker() {
-		this.$tabsTrackerTable.replaceChildren()
-		this.tabs.forEach((tab, index) => {
-			const row = this.$tabsTrackerTable.insertRow(index)
+		// clear table
+		document
+			.querySelectorAll("tbody")
+			.forEach((tbody) => this.$tabsTrackerTable.removeChild(tbody))
 
-			const titleCell = row.insertCell(0)
-			const timeOpenCell = row.insertCell(1)
-			const timeActiveCell = row.insertCell(2)
+		// create tabs object by `windowId`
+		const tabsByWindowObj = {}
+		this.tabs.forEach((tab, { windowId }) => {
+			if (!tabsByWindowObj[windowId]) {
+				tabsByWindowObj[windowId] = [tab]
+			} else {
+				tabsByWindowObj[windowId].push(tab)
+			}
+		})
 
-			const title = tab.title
-			const timeOpen = milliToMin(Date.now() - tab.createdAt)
-			const timeActive = tab.activeAt
-				? milliToMin(Date.now() - tab.activeAt)
-				: milliToMin(tab.timeActive)
+		// sort by position in window (index)
+		const tabsByWindowSorted = Object.values(tabsByWindowObj).map((tabsGroup) =>
+			tabsGroup.sort((a, b) => a.index - b.index)
+		)
 
-			titleCell.appendChild(document.createTextNode(title))
-			timeOpenCell.appendChild(document.createTextNode(timeOpen))
-			timeActiveCell.appendChild(document.createTextNode(timeActive))
+		// render
+		tabsByWindowSorted.forEach((windowTabs) => {
+			const body = this.$tabsTrackerTable.createTBody()
+
+			windowTabs.forEach((tab, index) => {
+				const row = body.insertRow(index)
+
+				const titleCell = row.insertCell(0)
+				const timeOpenCell = row.insertCell(1)
+				const timeActiveCell = row.insertCell(2)
+
+				const title = tab.title
+				const timeOpen = milliToMin(Date.now() - tab.createdAt)
+				const timeActive = tab.activeAt
+					? milliToMin(Date.now() - tab.activeAt)
+					: milliToMin(tab.timeActive)
+
+				titleCell.appendChild(document.createTextNode(title))
+				timeOpenCell.appendChild(document.createTextNode(timeOpen))
+				timeActiveCell.appendChild(document.createTextNode(timeActive))
+			})
 		})
 	},
 
