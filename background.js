@@ -31,12 +31,12 @@ const ProcrastabsManager = {
 		this.config = { ...this.config, ...config }
 		console.log("config: ", this.config)
 
-		this.registerExistingTabs()
+		await this.registerTabs()
+		await this.syncWithClient()
+
 		this.setTabsListeners()
 		this.setWindowsListeners()
 		this.setStorageSyncListener()
-
-		await this.syncWithClient()
 
 		if (config.countdownEnabled && this.tabs.length === this.config.maxTabs) {
 			this.startCountdown()
@@ -80,7 +80,7 @@ const ProcrastabsManager = {
 		}
 	},
 
-	async registerExistingTabs() {
+	async registerTabs() {
 		const currentTab = await this.queryActiveTab()
 		const { id, windowId } = currentTab
 
@@ -133,7 +133,7 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onUpdated.addListener((tabId, updates) => {
-			console.log("updated ", tabId, updates)
+			// console.log("updated ", tabId, updates)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					if (updates.status === "complete") {
@@ -144,13 +144,13 @@ const ProcrastabsManager = {
 				return tab
 			})
 
-			console.log(this.tabs)
+			// console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 
 		chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 			const { isWindowClosing, windowId } = removeInfo
-			console.log("removed ", tabId, " - ", windowId)
+			// console.log("removed ", tabId, " - ", windowId)
 			if (isWindowClosing) {
 				this.tabs = this.tabs.filter((tab) => tab.windowId !== windowId)
 			} else {
@@ -164,7 +164,7 @@ const ProcrastabsManager = {
 					return tab
 				})
 			}
-			console.log(this.tabs)
+			// console.log(this.tabs)
 
 			if (
 				this.config.countdownEnabled &&
@@ -182,14 +182,14 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-			console.log("activated ", tabId)
+			// console.log("activated ", tabId)
 			this.updateTimestampsOnTabChange(tabId)
 			this.syncTabsWithClient()
 		})
 
 		chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
 			const { windowId, fromIndex, toIndex } = moveInfo
-			console.log("moved ", tabId, " - ", windowId)
+			// console.log("moved ", tabId, " - ", windowId)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					tab.index = toIndex
@@ -198,15 +198,15 @@ const ProcrastabsManager = {
 				}
 				return tab
 			})
-			console.log(this.tabs)
+			// console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 	},
 
 	setWindowsListeners() {
 		chrome.windows.onFocusChanged.addListener(async (windowId) => {
-			console.log("window focus, id:", windowId)
-			//console.log(windowId)
+			// console.log("window focus, id:", windowId)
+			// console.log(windowId)
 			if (windowId === -1) {
 				// All Chrome Windows have lost focus
 				this.tabs = this.tabs.map((tab) => {
@@ -221,7 +221,7 @@ const ProcrastabsManager = {
 				this.updateTimestampsOnTabChange(id)
 			}
 
-			console.log(this.tabs)
+			// console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 	},
@@ -346,8 +346,8 @@ const ProcrastabsManager = {
 		chrome.action.setBadgeBackgroundColor({ color })
 	},
 
-	removeExtraPropsFromTabs() {
-		this.tabs = this.tabs.map((tab) => ({
+	removeExtraPropsFromTabs(tabs) {
+		return tabs.map((tab) => ({
 			id: tab.id,
 			windowId: tab.windowId,
 			index: tab.index,
@@ -361,8 +361,8 @@ const ProcrastabsManager = {
 
 	async syncTabsWithClient() {
 		try {
-			this.removeExtraPropsFromTabs()
-			await chrome.storage.sync.set({ tabs: this.tabs })
+			const tabs = this.removeExtraPropsFromTabs(this.tabs)
+			await chrome.storage.sync.set({ tabs })
 			this.updateBadge()
 		} catch (e) {
 			console.error(e)
@@ -371,9 +371,9 @@ const ProcrastabsManager = {
 
 	async syncWithClient() {
 		try {
-			this.removeExtraPropsFromTabs()
+			const tabs = this.removeExtraPropsFromTabs(this.tabs)
 			await chrome.storage.sync.set({
-				tabs: this.tabs,
+				tabs,
 				maxTabs: this.config.maxTabs,
 				maxTabsEnabled: this.config.maxTabsEnabled,
 				countdown: this.config.countdown,
