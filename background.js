@@ -18,7 +18,12 @@ const ProcrastabsManager = {
 
 	async init() {
 		const tabs = await this.queryTabs()
+		const activeTab = await this.queryActiveTab()
 		const config = await this.getConfigFromStorage()
+
+		const { tabs: storageTabs } = config
+		const { id: activeTabId, windowId: activetWindowId } = activeTab
+		let storageTab
 
 		if (!config.maxTabs) {
 			config.maxTabs = tabs.length
@@ -27,11 +32,39 @@ const ProcrastabsManager = {
 			config.countdownEnabled = false
 		}
 
-		this.tabs = tabs
+		this.tabs = tabs.map((currentTab) => {
+			if (storageTabs) {
+				storageTab = storageTabs.find((sTab) => sTab.id === currentTab.id)
+			}
+
+			const tab = storageTab || currentTab
+
+			if (tab.activeAt) {
+				// session was closed before resetting tab activation timestamp
+				tab.timeActive += Date.now() - tab.activeAt
+				tab.activeAt = null
+			}
+
+			if (tab.id === activeTabId && tab.windowId === activetWindowId) {
+				tab.activeAt = Date.now()
+			}
+
+			if (storageTab) {
+				return tab
+			}
+
+			return {
+				...tab,
+				createdAt: Date.now(),
+				timeActive: 0,
+			}
+		})
+
 		this.config = { ...this.config, ...config }
+
+		console.log("tabs: ", this.tabs)
 		console.log("config: ", this.config)
 
-		await this.registerTabs()
 		await this.syncWithClient()
 
 		this.setTabsListeners()
@@ -68,6 +101,7 @@ const ProcrastabsManager = {
 	async getConfigFromStorage() {
 		try {
 			const config = await chrome.storage.sync.get([
+				"tabs",
 				"maxTabs",
 				"maxTabsEnabled",
 				"countdown",
@@ -78,23 +112,6 @@ const ProcrastabsManager = {
 		} catch (e) {
 			console.error(e)
 		}
-	},
-
-	async registerTabs() {
-		const currentTab = await this.queryActiveTab()
-		const { id, windowId } = currentTab
-
-		this.tabs = this.tabs.map((tab) => {
-			if (tab.id === id && tab.windowId === windowId) {
-				tab.activeAt = Date.now()
-			}
-
-			return {
-				...tab,
-				createdAt: Date.now(),
-				timeActive: 0,
-			}
-		})
 	},
 
 	setTabsListeners() {
