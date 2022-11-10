@@ -137,6 +137,11 @@ const ProcrastabsManager = {
 			console.log("on updated ", tabId)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
+					if (updates.url && tab.url && updates.url !== tab.url) {
+						// tab changed its url
+						tab.createdAt = Date.now()
+						tab.timeActive = 0
+					}
 					return { ...tab, ...updates }
 				}
 				return tab
