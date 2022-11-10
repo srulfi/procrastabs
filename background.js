@@ -99,6 +99,7 @@ const ProcrastabsManager = {
 
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
+			console.log("on created ", tab.id)
 			const newTab = {
 				...tab,
 				createdAt: Date.now(),
@@ -133,12 +134,9 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onUpdated.addListener((tabId, updates) => {
-			// console.log("updated ", tabId, updates)
+			console.log("on updated ", tabId)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
-					if (updates.status === "complete") {
-						tab.activeAt = Date.now()
-					}
 					return { ...tab, ...updates }
 				}
 				return tab
@@ -150,7 +148,7 @@ const ProcrastabsManager = {
 
 		chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 			const { isWindowClosing, windowId } = removeInfo
-			// console.log("removed ", tabId, " - ", windowId)
+			console.log("on removed ", tabId, " - wId: ", windowId)
 			if (isWindowClosing) {
 				this.tabs = this.tabs.filter((tab) => tab.windowId !== windowId)
 			} else {
@@ -182,14 +180,14 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onActivated.addListener(async ({ tabId }) => {
-			// console.log("activated ", tabId)
-			this.updateTimestampsOnTabChange(tabId)
+			console.log("on activated ", tabId)
+			this.updateActivityOnTabChange(tabId)
 			this.syncTabsWithClient()
 		})
 
 		chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
 			const { windowId, fromIndex, toIndex } = moveInfo
-			// console.log("moved ", tabId, " - ", windowId)
+			console.log("on moved ", tabId, " - wId: ", windowId)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					tab.index = toIndex
@@ -205,7 +203,7 @@ const ProcrastabsManager = {
 
 	setWindowsListeners() {
 		chrome.windows.onFocusChanged.addListener(async (windowId) => {
-			// console.log("window focus, id:", windowId)
+			console.log("on window focus, wId: ", windowId)
 			// console.log(windowId)
 			if (windowId === -1) {
 				// All Chrome Windows have lost focus
@@ -218,7 +216,7 @@ const ProcrastabsManager = {
 				})
 			} else {
 				const { id } = await this.queryActiveTab()
-				this.updateTimestampsOnTabChange(id)
+				this.updateActivityOnTabChange(id)
 			}
 
 			// console.log(this.tabs)
@@ -276,13 +274,15 @@ const ProcrastabsManager = {
 		})
 	},
 
-	updateTimestampsOnTabChange(tabId) {
+	updateActivityOnTabChange(tabId) {
 		this.tabs = this.tabs.map((tab) => {
-			if (tab.id === tabId && !tab.activeAt && tab.url) {
+			if (tab.id === tabId && !tab.activeAt) {
 				// current active tab
+				console.log("activate ", tab.id)
 				tab.activeAt = Date.now()
 			} else if (tab.id !== tabId && tab.activeAt) {
 				// previous active tab
+				console.log("deactivate ", tab.id)
 				tab.timeActive += Date.now() - tab.activeAt
 				tab.activeAt = null
 			}
