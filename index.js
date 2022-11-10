@@ -154,7 +154,7 @@ const Popup = {
 				const title = tab.title
 				const timeOpen = milliToMin(Date.now() - tab.createdAt)
 				const timeActive = tab.activeAt
-					? milliToMin(Date.now() - tab.activeAt)
+					? milliToMin(tab.timeActive + Date.now() - tab.activeAt)
 					: milliToMin(tab.timeActive)
 
 				titleCell.appendChild(document.createTextNode(title))
