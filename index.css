@@ -22,6 +22,10 @@ table {
 	width: 300px;
 }
 
+th {
+	text-align: left;
+}
+
 tr td:first-child {
 	display: block;
 	width: 180px;
