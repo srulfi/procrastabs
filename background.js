@@ -157,6 +157,7 @@ const ProcrastabsManager = {
 					if (updates.url && tab.url && updates.url !== tab.url) {
 						// tab changed its url
 						tab.createdAt = Date.now()
+						tab.activeAt = Date.now()
 						tab.timeActive = 0
 					}
 					return { ...tab, ...updates }
