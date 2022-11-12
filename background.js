@@ -242,8 +242,10 @@ const ProcrastabsManager = {
 					return tab
 				})
 			} else {
-				const { id } = await this.queryActiveTab()
-				this.updateActivityOnTabChange(id)
+				const activeTab = await this.queryActiveTab()
+				if (activeTab) {
+					this.updateActivityOnTabChange(activeTab.id)
+				}
 			}
 
 			// console.log(this.tabs)
@@ -333,16 +335,19 @@ const ProcrastabsManager = {
 
 	async handlePopupClose() {
 		console.log("popup close")
-		const { id } = await this.queryActiveTab()
-		this.tabs = this.tabs.map((tab) => {
-			if (tab.id === id) {
-				console.log("activate ", id)
-				tab.activeAt = Date.now()
-			}
-			return tab
-		})
+		const activeTab = await this.queryActiveTab()
 
-		this.syncTabsWithClient()
+		if (activeTab) {
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.id === activeTab.id) {
+					console.log("activate ", activeTab.id)
+					tab.activeAt = Date.now()
+				}
+				return tab
+			})
+
+			this.syncTabsWithClient()
+		}
 	},
 
 	startCountdown() {
@@ -356,8 +361,10 @@ const ProcrastabsManager = {
 
 			if (secondsPast === countdownInSeconds) {
 				if (!this.hasTabsLeft()) {
-					const { id } = await this.queryActiveTab()
-					this.removeTabsById([id])
+					const activeTab = await this.queryActiveTab()
+					if (activeTab) {
+						this.removeTabsById([activeTab.id])
+					}
 				}
 
 				this.stopCountdown()
