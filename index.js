@@ -10,6 +10,7 @@ const Popup = {
 	$message: document.querySelector("#message"),
 
 	async init() {
+		console.log("popup init")
 		const config = await this.getConfigFromStorage()
 
 		this.tabs = config.tabs
@@ -205,4 +206,7 @@ const Popup = {
 	},
 }
 
-window.onload = () => Popup.init()
+window.onload = () => {
+	chrome.runtime.connect({ name: "popup" })
+	Popup.init()
+}
