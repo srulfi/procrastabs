@@ -12,7 +12,6 @@ const Popup = {
 	$message: document.querySelector("#message"),
 
 	async init() {
-		console.log("popup init")
 		const config = await this.getConfigFromStorage()
 
 		this.tabs = config.tabs
@@ -62,15 +61,12 @@ const Popup = {
 		})
 
 		this.$maxTabsInput.addEventListener("keydown", (e) => {
-			const value = parseInt(this.$maxTabsInput.value + e.key)
-
-			if (
-				isNaN(value) ||
-				value > this.maxTabsInputMax ||
-				value < this.maxTabsInputMin
-			) {
-				e.preventDefault()
-			}
+			return this.handleInvalidKeyboardValues(
+				e,
+				this.$maxTabsInput.value,
+				this.maxTabsInputMin,
+				this.maxTabsInputMax
+			)
 		})
 
 		this.$maxTabsSwitch.addEventListener("change", () => {
@@ -92,6 +88,15 @@ const Popup = {
 		this.$countdownInput.addEventListener("change", () => {
 			this.setStorageItems({ countdown: Number(this.$countdownInput.value) })
 			this.resetMessage()
+		})
+
+		this.$countdownInput.addEventListener("keydown", (e) => {
+			return this.handleInvalidKeyboardValues(
+				e,
+				this.$countdownInput.value,
+				this.countdownInputMin,
+				this.countdownInputMax
+			)
 		})
 
 		this.$countdownSwitch.addEventListener("change", () => {
@@ -137,6 +142,14 @@ const Popup = {
 			.set(items)
 			.then(callback)
 			.catch((e) => this.displayErrorMessage(e))
+	},
+
+	handleInvalidKeyboardValues(event, value, min, max) {
+		const inputValue = parseInt(value + event.key)
+
+		if (isNaN(inputValue) || inputValue < min || inputValue > max) {
+			return event.preventDefault()
+		}
 	},
 
 	populateTracker() {
