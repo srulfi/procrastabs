@@ -1,4 +1,6 @@
-const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
+const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000)
+const calculatePercentage = (total, sample) =>
+	Math.round((sample * 100) / total)
 
 const Popup = {
 	$tabsTrackerTable: document.querySelector("#tabstracker-table"),
@@ -157,16 +159,18 @@ const Popup = {
 				const timeActive = tab.activeAt
 					? milliToMin(tab.timeActive + Date.now() - tab.activeAt)
 					: milliToMin(tab.timeActive)
+				const timeActivePerc = calculatePercentage(timeOpen, timeActive)
+				const timeActiveAndPerc = `${timeActive} (${timeActivePerc}%)`
 
 				titleCell.appendChild(document.createTextNode(title))
 				timeOpenCell.appendChild(document.createTextNode(timeOpen))
-				timeActiveCell.appendChild(document.createTextNode(timeActive))
+				timeActiveCell.appendChild(document.createTextNode(timeActiveAndPerc))
 			})
 		})
 	},
 
 	setTrackerInterval() {
-		this.trackerInterval = setInterval(() => this.populateTracker(), 20000)
+		this.trackerInterval = setInterval(() => this.populateTracker(), 3000)
 	},
 
 	enableMaxTabs() {
