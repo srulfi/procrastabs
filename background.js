@@ -241,10 +241,15 @@ const ProcrastabsManager = {
 					}
 					return tab
 				})
+				this.stopCountdown()
 			} else {
 				const activeTab = await this.queryActiveTab()
 				if (activeTab) {
 					this.updateActivityOnTabChange(activeTab.id)
+				}
+
+				if (this.config.countdownEnabled && !this.hasTabsLeft()) {
+					this.startCountdown()
 				}
 			}
 
