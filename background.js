@@ -69,6 +69,7 @@ const ProcrastabsManager = {
 
 		await this.syncWithClient()
 
+		this.updateBadge()
 		this.setTabsListeners()
 		this.setWindowsListeners()
 		this.setStorageSyncListener()
@@ -140,6 +141,7 @@ const ProcrastabsManager = {
 					if (duplicateTabs.length) {
 						this.removeTabsById(duplicateTabs.map((duplicate) => duplicate.id))
 						this.syncTabsWithClient()
+						this.updateBadge()
 						return
 					}
 				}
@@ -149,6 +151,7 @@ const ProcrastabsManager = {
 				}
 
 				this.syncTabsWithClient()
+				this.updateBadge()
 			}
 		})
 
@@ -201,6 +204,7 @@ const ProcrastabsManager = {
 
 			if (!this.bypassSync) {
 				this.syncTabsWithClient()
+				this.updateBadge()
 			}
 
 			this.bypassSync = false
@@ -242,6 +246,7 @@ const ProcrastabsManager = {
 					return tab
 				})
 				this.stopCountdown()
+				this.updateBadge()
 			} else {
 				const activeTab = await this.queryActiveTab()
 				if (activeTab) {
@@ -250,6 +255,7 @@ const ProcrastabsManager = {
 
 				if (this.config.countdownEnabled && !this.hasTabsLeft()) {
 					this.startCountdown()
+					this.updateBadge()
 				}
 			}
 
@@ -430,7 +436,6 @@ const ProcrastabsManager = {
 		try {
 			const tabs = this.removeExtraPropsFromTabs(this.tabs)
 			await chrome.storage.sync.set({ tabs })
-			this.updateBadge()
 		} catch (e) {
 			console.error(e)
 		}
