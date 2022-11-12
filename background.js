@@ -22,7 +22,6 @@ const ProcrastabsManager = {
 		const config = await this.getConfigFromStorage()
 
 		const { tabs: storageTabs } = config
-		const { id: activeTabId, windowId: activetWindowId } = activeTab
 		let storageTab
 
 		if (!config.maxTabs) {
@@ -45,8 +44,11 @@ const ProcrastabsManager = {
 				tab.activeAt = null
 			}
 
-			if (tab.id === activeTabId && tab.windowId === activetWindowId) {
-				tab.activeAt = Date.now()
+			if (activeTab) {
+				const { id: activeTabId, windowId: activetWindowId } = activeTab
+				if (tab.id === activeTabId && tab.windowId === activetWindowId) {
+					tab.activeAt = Date.now()
+				}
 			}
 
 			if (storageTab) {
