@@ -173,7 +173,9 @@ const ProcrastabsManager = {
 			const { isWindowClosing, windowId } = removeInfo
 			console.log("on removed ", tabId, " - wId: ", windowId)
 			if (isWindowClosing) {
-				this.tabs = this.tabs.filter((tab) => tab.windowId !== windowId)
+				this.tabs = this.tabs.filter(
+					(tab) => tab.windowId !== windowId && tab.id !== tabId
+				)
 			} else {
 				const removedTabIndex = this.tabs.findIndex((tab) => tab.id === tabId)
 
