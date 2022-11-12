@@ -22,6 +22,11 @@ const Popup = {
 		this.$countdownSwitch.checked = config.countdownEnabled
 		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
 
+		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
+		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
+		this.countdownInputMin = parseInt(this.$countdownInput.getAttribute("min"))
+		this.countdownInputMax = parseInt(this.$countdownInput.getAttribute("max"))
+
 		this.setEventListeners()
 		this.setStorageListeners()
 		this.populateTracker()
@@ -54,6 +59,18 @@ const Popup = {
 
 			this.setStorageItems({ maxTabs: parseInt(this.$maxTabsInput.value) })
 			this.resetMessage()
+		})
+
+		this.$maxTabsInput.addEventListener("keydown", (e) => {
+			const value = parseInt(this.$maxTabsInput.value + e.key)
+
+			if (
+				isNaN(value) ||
+				value > this.maxTabsInputMax ||
+				value < this.maxTabsInputMin
+			) {
+				e.preventDefault()
+			}
 		})
 
 		this.$maxTabsSwitch.addEventListener("change", () => {
