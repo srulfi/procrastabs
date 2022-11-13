@@ -193,11 +193,7 @@ const ProcrastabsManager = {
 			}
 			// console.log(this.tabs)
 
-			if (
-				this.config.countdownEnabled &&
-				this.hasTabsLeft() &&
-				this.countdownOn
-			) {
+			if (this.config.countdownEnabled && this.hasTabsLeft()) {
 				this.stopCountdown()
 			}
 
@@ -272,7 +268,7 @@ const ProcrastabsManager = {
 					case "maxTabs":
 						if (this.config.countdownEnabled && !this.hasTabsLeft()) {
 							this.startCountdown()
-						} else if (this.countdownOn) {
+						} else {
 							this.stopCountdown()
 						}
 						this.updateBadge()
@@ -294,7 +290,7 @@ const ProcrastabsManager = {
 						if (newValue && !this.hasTabsLeft()) {
 							this.startCountdown()
 							this.updateBadge()
-						} else if (!newValue && this.countdownOn) {
+						} else if (!newValue) {
 							this.stopCountdown()
 							this.updateBadge()
 						}
@@ -333,8 +329,6 @@ const ProcrastabsManager = {
 		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
 
-		this.countdownOn = true
-
 		this.countdownInterval = setInterval(async () => {
 			const minutesRemaining = Math.ceil(
 				this.config.countdown - secondsPast / 60
@@ -365,7 +359,6 @@ const ProcrastabsManager = {
 
 	stopCountdown() {
 		clearInterval(this.countdownInterval)
-		this.countdownOn = false
 	},
 
 	removeTabsById(tabIds) {
