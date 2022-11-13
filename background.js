@@ -282,7 +282,8 @@ const ProcrastabsManager = {
 						if (this.config.countdownEnabled && !this.hasTabsLeft()) {
 							this.stopCountdown()
 							this.startCountdown()
-							this.updateBadge()
+							this.setBadgeColor(this.config.badgeCountdownColor)
+							this.setBadgeText(`${newValue.toString()}m`)
 						}
 						break
 
@@ -350,7 +351,7 @@ const ProcrastabsManager = {
 				this.setBadgeText(
 					secondsRemaining < 60
 						? secondsRemaining.toString()
-						: `${minutesRemaining.toString()}'`
+						: `${minutesRemaining.toString()}m`
 				)
 			}
 			secondsPast += 1
