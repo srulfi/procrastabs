@@ -7,7 +7,6 @@ const ProcrastabsManager = {
 	config: {
 		badgeBaseColor: defaults.badge.baseColor,
 		badgeCountdownColor: defaults.badge.countdownColor,
-		badgeCountdownSeconds: defaults.badge.countdownSeconds,
 		badgeCountdownEnabled: defaults.badge.countdownEnabled,
 		maxTabs: defaults.maxTabs.value,
 		maxTabsEnabled: defaults.maxTabs.enabled,
@@ -337,7 +336,10 @@ const ProcrastabsManager = {
 		this.countdownOn = true
 
 		this.countdownInterval = setInterval(async () => {
-			const timeRemaining = countdownInSeconds - secondsPast
+			const minutesRemaining = Math.ceil(
+				this.config.countdown - secondsPast / 60
+			)
+			const secondsRemaining = countdownInSeconds - secondsPast
 
 			if (secondsPast === countdownInSeconds) {
 				if (!this.hasTabsLeft()) {
@@ -349,12 +351,13 @@ const ProcrastabsManager = {
 						this.updateBadge()
 					}
 				}
-			} else if (
-				this.config.badgeCountdownEnabled &&
-				timeRemaining < this.config.badgeCountdownSeconds
-			) {
+			} else if (this.config.badgeCountdownEnabled) {
 				this.setBadgeColor(this.config.badgeCountdownColor)
-				this.setBadgeText(timeRemaining.toString())
+				this.setBadgeText(
+					secondsRemaining < 60
+						? secondsRemaining.toString()
+						: `${minutesRemaining.toString()}'`
+				)
 			}
 			secondsPast += 1
 		}, 1000)
