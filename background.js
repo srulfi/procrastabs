@@ -75,7 +75,8 @@ const ProcrastabsManager = {
 
 		if (config.countdownEnabled && this.tabs.length === this.config.maxTabs) {
 			this.startCountdown()
-			this.updateBadge()
+			this.setBadgeCountdownColor()
+			this.setBadgeCountdownInMinutes(this.config.countdown)
 		}
 	},
 
@@ -145,12 +146,20 @@ const ProcrastabsManager = {
 					}
 				}
 
-				if (this.config.countdownEnabled && !this.hasTabsLeft()) {
-					this.startCountdown()
+				if (this.config.countdownEnabled) {
+					if (this.hasTabsLeft()) {
+						this.stopCountdown()
+						this.updateBadge()
+					} else {
+						this.startCountdown()
+						this.setBadgeCountdownColor()
+						this.setBadgeCountdownInMinutes(this.config.countdown)
+					}
+				} else {
+					this.updateBadge()
 				}
 
 				this.syncTabsWithClient()
-				this.updateBadge()
 			}
 		})
 
@@ -263,49 +272,35 @@ const ProcrastabsManager = {
 		chrome.storage.onChanged.addListener((changes) => {
 			for (let [key, { newValue }] of Object.entries(changes)) {
 				this.config[key] = newValue
-
-				switch (key) {
-					case "maxTabs":
-						if (this.config.countdownEnabled && !this.hasTabsLeft()) {
-							this.startCountdown()
-						} else {
-							this.stopCountdown()
-						}
-						this.updateBadge()
-						break
-
-					case "maxTabsEnabled":
-						this.updateBadge()
-						break
-
-					case "countdown":
-						if (this.config.countdownEnabled && !this.hasTabsLeft()) {
-							this.stopCountdown()
-							this.startCountdown()
-							this.setBadgeColor(this.config.badgeCountdownColor)
-							this.setBadgeText(`${newValue.toString()}m`)
-						}
-						break
-
-					case "countdownEnabled":
-						if (newValue && !this.hasTabsLeft()) {
-							this.startCountdown()
-							this.updateBadge()
-						} else if (!newValue) {
-							this.stopCountdown()
-							this.updateBadge()
-						}
-						break
-
-					case "closeDuplicates":
-						if (this.config.closeDuplicates && newValue) {
-							this.closeDuplicateTabs()
-							break
-						}
-
-					default:
-						break
+				if (
+					key === "maxTabs" ||
+					key === "maxTabsEnabled" ||
+					key === "countdown" ||
+					key === "countdownEnabled"
+				) {
+					this.stopCountdown()
 				}
+
+				if (key === "tabs") {
+					return
+				}
+
+				if (key === "closeDuplicates") {
+					this.closeDuplicateTabs()
+					return
+				}
+			}
+
+			if (this.config.countdownEnabled) {
+				if (!this.hasTabsLeft()) {
+					this.startCountdown()
+					this.setBadgeCountdownColor()
+					this.setBadgeCountdownInMinutes(this.config.countdown)
+				} else {
+					this.updateBadge()
+				}
+			} else {
+				this.updateBadge()
 			}
 		})
 	},
@@ -347,12 +342,12 @@ const ProcrastabsManager = {
 					}
 				}
 			} else if (this.config.badgeCountdownEnabled) {
-				this.setBadgeColor(this.config.badgeCountdownColor)
-				this.setBadgeText(
-					secondsRemaining < 60
-						? secondsRemaining.toString()
-						: `${minutesRemaining.toString()}m`
-				)
+				this.setBadgeCountdownColor()
+				if (secondsRemaining < 60) {
+					this.setBadgeCountdownInSeconds(secondsRemaining)
+				} else {
+					this.setBadgeCountdownInMinutes(minutesRemaining)
+				}
 			}
 			secondsPast += 1
 		}, 1000)
@@ -375,6 +370,18 @@ const ProcrastabsManager = {
 
 		this.setBadgeText(text)
 		this.setBadgeColor(this.config.badgeBaseColor)
+	},
+
+	setBadgeCountdownColor() {
+		this.setBadgeColor(this.config.badgeCountdownColor)
+	},
+
+	setBadgeCountdownInMinutes(minutes) {
+		this.setBadgeText(`${minutes.toString()}m`)
+	},
+
+	setBadgeCountdownInSeconds(seconds) {
+		this.setBadgeText(seconds.toString())
 	},
 
 	setBadgeText(text) {
