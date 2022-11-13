@@ -330,37 +330,6 @@ const ProcrastabsManager = {
 		})
 	},
 
-	handlePopupOpen() {
-		console.log("popup open")
-		this.tabs = this.tabs.map((tab) => {
-			if (tab.activeAt) {
-				console.log("deactivate ", tab.id)
-				tab.timeActive += Date.now() - tab.activeAt
-				tab.activeAt = null
-			}
-			return tab
-		})
-
-		this.syncTabsWithClient()
-	},
-
-	async handlePopupClose() {
-		console.log("popup close")
-		const activeTab = await this.queryActiveTab()
-
-		if (activeTab) {
-			this.tabs = this.tabs.map((tab) => {
-				if (tab.id === activeTab.id) {
-					console.log("activate ", activeTab.id)
-					tab.activeAt = Date.now()
-				}
-				return tab
-			})
-
-			this.syncTabsWithClient()
-		}
-	},
-
 	startCountdown() {
 		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
@@ -503,10 +472,7 @@ ProcrastabsManager.init()
 let lifeline
 
 chrome.runtime.onConnect.addListener((port) => {
-	if (port.name === "popup") {
-		ProcrastabsManager.handlePopupOpen()
-		port.onDisconnect.addListener(() => ProcrastabsManager.handlePopupClose())
-	} else if (port.name === "keep-alive") {
+	if (port.name === "keep-alive") {
 		lifeline = port
 		setTimeout(forceKeepAlive, 295e3) // 5 minutes minus 5 seconds
 		port.onDisconnect.addListener(forceKeepAlive)
