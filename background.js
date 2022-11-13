@@ -375,11 +375,11 @@ const ProcrastabsManager = {
 					const activeTab = await this.queryActiveTab()
 					if (activeTab) {
 						this.removeTabsById([activeTab.id])
+					} else {
+						this.stopCountdown()
+						this.updateBadge()
 					}
 				}
-
-				this.stopCountdown()
-				this.updateBadge()
 			} else if (
 				this.config.badgeCountdownEnabled &&
 				timeRemaining < this.config.badgeCountdownSeconds
