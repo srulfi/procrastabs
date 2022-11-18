@@ -173,10 +173,27 @@ const ProcrastabsManager = {
 						tab.activeAt = Date.now()
 						tab.timeActive = 0
 					}
+
 					return { ...tab, ...updates }
 				}
 				return tab
 			})
+
+			if (this.config.closeDuplicates) {
+				const tab = this.tabs.find((tab) => tab.id === tabId)
+				if (tab?.status === "complete") {
+					const duplicateTabs = this.getDuplicateTabsOf(tab)
+
+					if (duplicateTabs.length) {
+						this.removeTabsById([tabId])
+						this.syncTabsWithClient()
+						this.updateBadge()
+
+						chrome.tabs.highlight({ tabs: duplicateTabs[0].index })
+						return
+					}
+				}
+			}
 
 			// console.log(this.tabs)
 			this.syncTabsWithClient()
