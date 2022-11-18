@@ -150,7 +150,7 @@ const ProcrastabsManager = {
 					if (this.hasTabsLeft()) {
 						this.stopCountdown()
 						this.updateBadge()
-					} else {
+					} else if (!this.countdownOn) {
 						this.startCountdown()
 						this.setBadgeCountdownColor()
 						this.setBadgeCountdownInMinutes(this.config.countdown)
@@ -257,7 +257,11 @@ const ProcrastabsManager = {
 					this.updateActivityOnTabChange(activeTab.id)
 				}
 
-				if (this.config.countdownEnabled && !this.hasTabsLeft()) {
+				if (
+					this.config.countdownEnabled &&
+					!this.hasTabsLeft() &&
+					!this.countdownOn
+				) {
 					this.startCountdown()
 					this.updateBadge()
 				}
@@ -292,7 +296,7 @@ const ProcrastabsManager = {
 			}
 
 			if (this.config.countdownEnabled) {
-				if (!this.hasTabsLeft()) {
+				if (!this.hasTabsLeft() && !this.countdownOn) {
 					this.startCountdown()
 					this.setBadgeCountdownColor()
 					this.setBadgeCountdownInMinutes(this.config.countdown)
@@ -325,6 +329,8 @@ const ProcrastabsManager = {
 		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
 
+		this.countdownOn = true
+
 		this.countdownInterval = setInterval(async () => {
 			const minutesRemaining = Math.ceil(
 				this.config.countdown - secondsPast / 60
@@ -355,6 +361,7 @@ const ProcrastabsManager = {
 
 	stopCountdown() {
 		clearInterval(this.countdownInterval)
+		this.countdownOn = false
 	},
 
 	removeTabsById(tabIds) {
