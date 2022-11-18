@@ -214,8 +214,16 @@ const ProcrastabsManager = {
 			this.bypassSync = false
 		})
 
-		chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+		chrome.tabs.onActivated.addListener(async ({ tabId, windowId }) => {
 			console.log("on activated ", tabId)
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.id === tabId) {
+					// update windowId in case tab got activated after being detached from window
+					tab.windowId = windowId
+				}
+				return tab
+			})
+
 			this.updateActivityOnTabChange(tabId)
 			this.syncTabsWithClient()
 		})
