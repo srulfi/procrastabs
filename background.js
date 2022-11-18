@@ -119,7 +119,6 @@ const ProcrastabsManager = {
 
 	setTabsListeners() {
 		chrome.tabs.onCreated.addListener((tab) => {
-			console.log("on created ", tab.id)
 			const newTab = {
 				...tab,
 				createdAt: Date.now(),
@@ -164,7 +163,6 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onUpdated.addListener((tabId, updates) => {
-			console.log("on updated ", tabId)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					if (updates.url && tab.url && updates.url !== tab.url) {
@@ -195,13 +193,12 @@ const ProcrastabsManager = {
 				}
 			}
 
-			// console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 
 		chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
 			const { isWindowClosing, windowId } = removeInfo
-			console.log("on removed ", tabId, " - wId: ", windowId)
+
 			if (isWindowClosing) {
 				this.tabs = this.tabs.filter(
 					(tab) => tab.windowId !== windowId && tab.id !== tabId
@@ -217,7 +214,6 @@ const ProcrastabsManager = {
 					return tab
 				})
 			}
-			// console.log(this.tabs)
 
 			if (this.config.countdownEnabled && this.hasTabsLeft()) {
 				this.stopCountdown()
@@ -232,7 +228,6 @@ const ProcrastabsManager = {
 		})
 
 		chrome.tabs.onActivated.addListener(async ({ tabId, windowId }) => {
-			console.log("on activated ", tabId)
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					// update windowId in case tab got activated after being detached from window
@@ -247,7 +242,7 @@ const ProcrastabsManager = {
 
 		chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
 			const { windowId, fromIndex, toIndex } = moveInfo
-			console.log("on moved ", tabId, " - wId: ", windowId)
+
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					tab.index = toIndex
@@ -256,20 +251,13 @@ const ProcrastabsManager = {
 				}
 				return tab
 			})
-			// console.log(this.tabs)
+
 			this.syncTabsWithClient()
 		})
 
 		chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
 			const { newPosition, newWindowId } = attachInfo
-			console.log(
-				"on attached ",
-				tabId,
-				" - newPosition: ",
-				newPosition,
-				" - newWindowId: ",
-				newWindowId
-			)
+
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					tab.windowId = newWindowId
@@ -285,14 +273,7 @@ const ProcrastabsManager = {
 
 		chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
 			const { oldPosition, oldWindowId } = detachInfo
-			console.log(
-				"on detached ",
-				tabId,
-				" - oldPosition: ",
-				oldPosition,
-				" - oldWindowId: ",
-				oldWindowId
-			)
+
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.windowId === oldWindowId && tab.index > oldPosition) {
 					tab.index -= 1
@@ -306,8 +287,6 @@ const ProcrastabsManager = {
 
 	setWindowsListeners() {
 		chrome.windows.onFocusChanged.addListener(async (windowId) => {
-			console.log("on window focus, wId: ", windowId)
-			// console.log(windowId)
 			if (windowId === -1) {
 				// All Chrome Windows have lost focus
 				this.tabs = this.tabs.map((tab) => {
@@ -335,7 +314,6 @@ const ProcrastabsManager = {
 				}
 			}
 
-			// console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
 	},
@@ -381,11 +359,9 @@ const ProcrastabsManager = {
 		this.tabs = this.tabs.map((tab) => {
 			if (tab.id === tabId && !tab.activeAt) {
 				// current active tab
-				console.log("activate ", tab.id)
 				tab.activeAt = Date.now()
 			} else if (tab.id !== tabId && tab.activeAt) {
 				// previous active tab
-				console.log("deactivate ", tab.id)
 				tab.timeActive += Date.now() - tab.activeAt
 				tab.activeAt = null
 			}
