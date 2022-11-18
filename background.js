@@ -340,7 +340,7 @@ const ProcrastabsManager = {
 					return
 				}
 
-				if (key === "closeDuplicates") {
+				if (key === "closeDuplicates" && newValue) {
 					this.closeDuplicateTabs()
 					return
 				}
