@@ -243,6 +243,29 @@ const ProcrastabsManager = {
 			this.syncTabsWithClient()
 		})
 
+		chrome.tabs.onAttached.addListener((tabId, attachInfo) => {
+			const { newPosition, newWindowId } = attachInfo
+			console.log(
+				"on attached ",
+				tabId,
+				" - newPosition: ",
+				newPosition,
+				" - newWindowId: ",
+				newWindowId
+			)
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.id === tabId) {
+					tab.windowId = newWindowId
+					tab.index = newPosition
+				} else if (tab.windowId === newWindowId && tab.index >= newPosition) {
+					tab.index += 1
+				}
+				return tab
+			})
+
+			this.syncTabsWithClient()
+		})
+
 		chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
 			const { oldPosition, oldWindowId } = detachInfo
 			console.log(
