@@ -160,7 +160,8 @@ const Popup = {
 
 		// create tabs object by `windowId`
 		const tabsByWindowObj = {}
-		this.tabs.forEach((tab, { windowId }) => {
+		this.tabs.forEach((tab) => {
+			const { windowId } = tab
 			if (!tabsByWindowObj[windowId]) {
 				tabsByWindowObj[windowId] = [tab]
 			} else {
