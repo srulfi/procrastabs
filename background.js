@@ -234,6 +234,26 @@ const ProcrastabsManager = {
 			// console.log(this.tabs)
 			this.syncTabsWithClient()
 		})
+
+		chrome.tabs.onDetached.addListener((tabId, detachInfo) => {
+			const { oldPosition, oldWindowId } = detachInfo
+			console.log(
+				"on detached ",
+				tabId,
+				" - oldPosition: ",
+				oldPosition,
+				" - oldWindowId: ",
+				oldWindowId
+			)
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.windowId === oldWindowId && tab.index > oldPosition) {
+					tab.index -= 1
+				}
+				return tab
+			})
+
+			this.syncTabsWithClient()
+		})
 	},
 
 	setWindowsListeners() {
