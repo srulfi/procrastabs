@@ -183,11 +183,9 @@ const ProcrastabsManager = {
 					const duplicateTabs = this.getDuplicateTabsOf(tab)
 
 					if (duplicateTabs.length) {
-						this.removeTabsById([tabId])
+						this.removeTabsById([duplicateTabs[0].id])
 						this.syncTabsWithClient()
 						this.updateBadge()
-
-						chrome.tabs.highlight({ tabs: duplicateTabs[0].index })
 						return
 					}
 				}
