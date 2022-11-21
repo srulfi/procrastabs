@@ -1,34 +1,174 @@
-thead, tbody {
-	vertical-align: top;
-}
-
-th, td {
-	font-weight: normal;
-	font-size: 11px;
+body {
+	background-color: #1f2427;
+	color: #fff;
+	width: 250px;
+	margin: 10px;
+	padding: 0;
+	border-radius: 5px;
 }
 
 h1 {
 	font-size: 14px;
+	margin: 0 0 10px;
 }
 
 #parent-container {
 	display: flex;
+	flex-direction: column;
+	border-top: 1px solid #fda354;
+}
+
+#config-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	width: 100%;
+	border-bottom: 1px solid #fda354;
+}
+
+.config-option-container {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	padding: 10px 0;
+}
+
+.config-option-container:first-child {
+	padding-right: 10px;
+	border-right: 1px solid #fda354;
+}
+
+.config-option-container:last-child {
+	margin-left: 10px;
+}
+
+.config-option-label {
+	width: 100%;
+	margin-bottom: 5px;
+	font-size: 12px;
+}
+
+.input-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-end;
+	align-items: center;
+}
+
+#maxtabs-input,
+#countdown-input {
+	font-family: monospace;
+	font-size: 28px;
+	text-align: right;
+	color: #fff;
+	background: #1f2427;
+	width: 55px;
+	border: none;
+}
+
+input[type="checkbox"] {
+	height: 0;
+	width: 0;
+	margin: 0;
+}
+
+input:focus-visible {
+	outline: none;
+}
+
+.switch-label {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 54px;
+	height: 30px;
+	background: grey;
+	display: block;
+	border-radius: 30px;
+	position: relative;
+}
+
+.switch-label:after {
+	content: "";
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 28px;
+	height: 28px;
+	background: #fff;
+	border-radius: 30px;
+	border: 1px solid lightgray;
+	transition: 0.3s;
+}
+
+input:checked + .switch-label {
+	background: #fda354;
+}
+
+input:checked + .switch-label:after {
+	left: calc(100%);
+	transform: translateX(-100%);
+}
+
+.switch-label:active:after {
+	width: 28px;
+}
+
+#bottom-bar {
+	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-	width: 450px;
+	align-items: center;
+	height: 30px;
+}
+
+#message {
+	font-size: 11px;
+	color: #fff;
+	text-align: right;
+}
+
+#buttons-container {
+	display: flex;
+	height: 100%;
+}
+
+button {
+	width: 30px;
+	cursor: pointer;
+	border: none;
+	background: none;
+	margin: 0;
+	padding: 0;
+}
+
+button.active {
+	background: #fda354;
 }
 
 table {
-	width: 300px;
+	display: none;
+	margin-top: 10px;
 }
 
-th {
+table.active {
+	display: block;
+}
+
+thead,
+tbody {
+	vertical-align: top;
+}
+
+th,
+td {
+	font-weight: normal;
+	font-size: 11px;
 	text-align: left;
 }
 
 tr td:first-child {
 	display: block;
-	width: 180px;
+	width: 170px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -36,84 +176,5 @@ tr td:first-child {
 
 tr {
 	border: 1px solid #000;
-  border-collapse: collapse;
-}
-
-.config-option-container {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-end;
-	margin-bottom: 10px;
-}
-
-.config-option-label {
-	border-top: 1px solid;
-	width: 100%;
-	margin-bottom: 5px;
-	padding-top: 5px;
-	text-align: right;
-	font-size: 11px;
-}
-
-.input-container {
-	display: flex;
-	flex-direction: row;
-	justify-content: flex-end;
-}
-
-#maxtabs-input,
-#countdown-input {
-	font-size: 20px;
-	width: 50px;
-}
-
-input[type=checkbox] {
-  height: 0;
-  width: 0;
-  visibility: hidden;
-}
-
-.switch-label {
-  cursor: pointer;
-  text-indent: -9999px;
-  width: 60px;
-  height: 30px;
-  background: grey;
-  display: block;
-  border-radius: 30px;
-	border: 1px solid #e4e4e4;
-  position: relative;
-}
-
-.switch-label:after {
-  content: "";
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 28px;
-  height: 28px;
-  background: #fff;
-  border-radius: 30px;
-	border: 1px solid lightgray;
-  transition: 0.3s;
-}
-
-input:checked + .switch-label {
-  background: #bada55;
-}
-
-input:checked + .switch-label:after {
-  left: calc(100%);
-  transform: translateX(-100%);
-}
-
-.switch-label:active:after {
-  width: 28px;
-}
-
-#message {
-	height: 25px;
-	font-size: 11px;
-	color: red;
-	text-align: right;
+	border-collapse: collapse;
 }

@@ -5,42 +5,85 @@
 	<body>
 		<h1>Procrastabs</h1>
 		<div id="parent-container">
-			<table id="tabstracker-table">
-				<thead>
-					<tr>
-						<th>Title</th>
-						<th>Time open</th>
-						<th>Time active</th>
-					</tr>
-				</thead>
-			</table>
 			<div id="config-container">
 				<div class="config-option-container">
-					<label for="maxtabs-input" class="config-option-label">Max concurrent tabs:</label>
+					<label for="maxtabs-input" class="config-option-label"
+						>Max open tabs:</label
+					>
 					<div class="input-container">
 						<input type="number" id="maxtabs-input" min="1" max="99" />
 						<input type="checkbox" id="maxtabs-switch" />
-						<label for="maxtabs-switch" class="switch-label">Toggle Max Tabs</label>
+						<label for="maxtabs-switch" class="switch-label"
+							>Toggle Max Tabs</label
+						>
 					</div>
 				</div>
 				<div class="config-option-container">
-					<label for="countdown-input" class="config-option-label">Minutes to close tab:</label>
+					<label for="countdown-input" class="config-option-label"
+						>Min. to close tab:</label
+					>
 					<div class="input-container">
 						<input type="number" id="countdown-input" min="1" max="60" />
 						<input type="checkbox" id="countdown-switch" />
-						<label for="countdown-switch" class="switch-label">Toggle Countdown</label>
+						<label for="countdown-switch" class="switch-label"
+							>Toggle Countdown</label
+						>
 					</div>
 				</div>
-				<div class="config-option-container">
+				<!--<div class="config-option-container">
 					<label for="duplicates-switch" class="config-option-label">Close duplicate tabs:</label>
 					<div class="input-container">
 						<input type="checkbox" id="duplicates-switch" />
 						<label for="duplicates-switch" class="switch-label">Toggle Close Duplicates</label>
 					</div>
+				</div>-->
+			</div>
+			<div id="bottom-bar">
+				<p id="message"></p>
+				<div id="buttons-container">
+					<button id="tracker-button">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							height="30px"
+							viewBox="0 0 24 24"
+							width="30px"
+							fill="#FFFFFF"
+						>
+							<path d="M0 0h24v24H0z" fill="none" />
+							<path
+								d="M3 9h14V7H3v2zm0 4h14v-2H3v2zm0 4h14v-2H3v2zm16 0h2v-2h-2v2zm0-10v2h2V7h-2zm0 6h2v-2h-2v2z"
+							/>
+						</svg>
+					</button>
+					<button id="settings-button">
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							enable-background="new 0 0 24 24"
+							height="22px"
+							viewBox="0 0 24 24"
+							width="22px"
+							fill="#FFFFFF"
+						>
+							<g>
+								<path d="M0,0h24v24H0V0z" fill="none" />
+								<path
+									d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"
+								/>
+							</g>
+						</svg>
+					</button>
 				</div>
 			</div>
+			<table id="tabstracker-table">
+				<thead>
+					<tr>
+						<th>Title</th>
+						<th>Open</th>
+						<th>Active</th>
+					</tr>
+				</thead>
+			</table>
 		</div>
-		<p id="message"></p>
 		<script src="index.js"></script>
 	</body>
 </html>

@@ -1,4 +1,6 @@
-const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000)
+const BTN_ACT_CLASS = "active"
+
+const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
 const calculatePercentage = (total, sample) =>
 	Math.round((sample * 100) / total)
 
@@ -8,8 +10,10 @@ const Popup = {
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
 	$countdownInput: document.querySelector("#countdown-input"),
 	$countdownSwitch: document.querySelector("#countdown-switch"),
-	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
+	//$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
 	$message: document.querySelector("#message"),
+	$trackerButton: document.querySelector("#tracker-button"),
+	$settingsButton: document.querySelector("#settings-button"),
 
 	async init() {
 		const config = await this.getConfigFromStorage()
@@ -19,7 +23,7 @@ const Popup = {
 		this.$maxTabsSwitch.checked = config.maxTabsEnabled
 		this.$countdownInput.value = config.countdown
 		this.$countdownSwitch.checked = config.countdownEnabled
-		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
+		//this.$closeDuplicatesSwitch.checked = config.closeDuplicates
 
 		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
 		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
@@ -114,11 +118,33 @@ const Popup = {
 			}
 		})
 
+		this.$trackerButton.addEventListener("click", () => {
+			if (this.$trackerButton.classList.contains(BTN_ACT_CLASS)) {
+				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
+				this.$tabsTrackerTable.classList.remove(BTN_ACT_CLASS)
+			} else {
+				this.$trackerButton.classList.add(BTN_ACT_CLASS)
+				this.$tabsTrackerTable.classList.add(BTN_ACT_CLASS)
+				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
+			}
+		})
+
+		this.$settingsButton.addEventListener("click", () => {
+			if (this.$settingsButton.classList.contains(BTN_ACT_CLASS)) {
+				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
+			} else {
+				this.$settingsButton.classList.add(BTN_ACT_CLASS)
+				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
+			}
+		})
+
+		/*
 		this.$closeDuplicatesSwitch.addEventListener("change", () => {
 			this.setStorageItems({
 				closeDuplicates: this.$closeDuplicatesSwitch.checked,
 			})
 		})
+		*/
 	},
 
 	setStorageListeners() {
@@ -201,7 +227,7 @@ const Popup = {
 	},
 
 	setTrackerInterval() {
-		this.trackerInterval = setInterval(() => this.populateTracker(), 3000)
+		this.trackerInterval = setInterval(() => this.populateTracker(), 10000)
 	},
 
 	enableMaxTabs() {
