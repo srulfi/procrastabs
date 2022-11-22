@@ -119,6 +119,7 @@ input:checked + .switch-label:after {
 	justify-content: space-between;
 	align-items: center;
 	height: 30px;
+	border-bottom: 1px solid #fda354;
 }
 
 #message {
@@ -145,12 +146,13 @@ button.active {
 	background: #fda354;
 }
 
-table {
+#tabs-tracker,
+#settings {
 	display: none;
 	margin-top: 10px;
 }
 
-table.active {
+#tabs-tracker.active {
 	display: block;
 }
 
@@ -177,4 +179,14 @@ tr td:first-child {
 tr {
 	border: 1px solid #000;
 	border-collapse: collapse;
+}
+
+#settings.active {
+	display: flex;
+}
+
+.settings-option {
+	display: flex;
+	flex: 1;
+	align-items: center;
 }

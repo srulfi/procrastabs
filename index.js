@@ -5,13 +5,14 @@ const calculatePercentage = (total, sample) =>
 	Math.round((sample * 100) / total)
 
 const Popup = {
-	$tabsTrackerTable: document.querySelector("#tabstracker-table"),
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
 	$countdownInput: document.querySelector("#countdown-input"),
 	$countdownSwitch: document.querySelector("#countdown-switch"),
-	//$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
+	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
 	$message: document.querySelector("#message"),
+	$tabsTracker: document.querySelector("#tabs-tracker"),
+	$settings: document.querySelector("#settings"),
 	$trackerButton: document.querySelector("#tracker-button"),
 	$settingsButton: document.querySelector("#settings-button"),
 
@@ -23,7 +24,7 @@ const Popup = {
 		this.$maxTabsSwitch.checked = config.maxTabsEnabled
 		this.$countdownInput.value = config.countdown
 		this.$countdownSwitch.checked = config.countdownEnabled
-		//this.$closeDuplicatesSwitch.checked = config.closeDuplicates
+		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
 
 		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
 		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
@@ -118,13 +119,19 @@ const Popup = {
 			}
 		})
 
+		this.$closeDuplicatesSwitch.addEventListener("change", () => {
+			this.setStorageItems({
+				closeDuplicates: this.$closeDuplicatesSwitch.checked,
+			})
+		})
+
 		this.$trackerButton.addEventListener("click", () => {
 			if (this.$trackerButton.classList.contains(BTN_ACT_CLASS)) {
 				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
-				this.$tabsTrackerTable.classList.remove(BTN_ACT_CLASS)
+				this.$tabsTracker.classList.remove(BTN_ACT_CLASS)
 			} else {
 				this.$trackerButton.classList.add(BTN_ACT_CLASS)
-				this.$tabsTrackerTable.classList.add(BTN_ACT_CLASS)
+				this.$tabsTracker.classList.add(BTN_ACT_CLASS)
 				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
 			}
 		})
@@ -132,19 +139,13 @@ const Popup = {
 		this.$settingsButton.addEventListener("click", () => {
 			if (this.$settingsButton.classList.contains(BTN_ACT_CLASS)) {
 				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
+				this.$settings.classList.remove(BTN_ACT_CLASS)
 			} else {
 				this.$settingsButton.classList.add(BTN_ACT_CLASS)
+				this.$settings.classList.add(BTN_ACT_CLASS)
 				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
 			}
 		})
-
-		/*
-		this.$closeDuplicatesSwitch.addEventListener("change", () => {
-			this.setStorageItems({
-				closeDuplicates: this.$closeDuplicatesSwitch.checked,
-			})
-		})
-		*/
 	},
 
 	setStorageListeners() {
@@ -182,7 +183,7 @@ const Popup = {
 		// clear table
 		document
 			.querySelectorAll("tbody")
-			.forEach((tbody) => this.$tabsTrackerTable.removeChild(tbody))
+			.forEach((tbody) => this.$tabsTracker.removeChild(tbody))
 
 		// create tabs object by `windowId`
 		const tabsByWindowObj = {}
@@ -202,7 +203,7 @@ const Popup = {
 
 		// render
 		tabsByWindowSorted.forEach((windowTabs) => {
-			const body = this.$tabsTrackerTable.createTBody()
+			const body = this.$tabsTracker.createTBody()
 
 			windowTabs.forEach((tab, index) => {
 				const row = body.insertRow(index)
