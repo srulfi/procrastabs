@@ -1,4 +1,6 @@
 const BTN_ACT_CLASS = "active"
+const TRACKER_CLASS = "tabs-tracker-grid"
+const TRACKER_TITLE_CLASS = "tab-title"
 
 const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
 const calculatePercentage = (total, sample) =>
@@ -201,10 +203,10 @@ const Popup = {
 	},
 
 	populateTracker() {
-		// clear table
+		// clear tracker
 		document
-			.querySelectorAll("tbody")
-			.forEach((tbody) => this.$tabsTracker.removeChild(tbody))
+			.querySelectorAll(".tabs-tracker-grid")
+			.forEach((windowTracker) => windowTracker.remove())
 
 		// create tabs object by `windowId`
 		const tabsByWindowObj = {}
@@ -224,14 +226,13 @@ const Popup = {
 
 		// render
 		tabsByWindowSorted.forEach((windowTabs) => {
-			const body = this.$tabsTracker.createTBody()
+			const windowTabsGrid = document.createElement("div")
+			windowTabsGrid.classList.add(TRACKER_CLASS)
 
-			windowTabs.forEach((tab, index) => {
-				const row = body.insertRow(index)
-
-				const titleCell = row.insertCell(0)
-				const timeOpenCell = row.insertCell(1)
-				const timeActiveCell = row.insertCell(2)
+			windowTabs.forEach((tab) => {
+				const titleEl = document.createElement("span")
+				const timeOpenEl = document.createElement("span")
+				const timeActiveEl = document.createElement("span")
 
 				const title = tab.title
 				const timeOpen = milliToMin(Date.now() - tab.createdAt)
@@ -241,10 +242,18 @@ const Popup = {
 				const timeActivePerc = calculatePercentage(timeOpen, timeActive)
 				const timeActiveAndPerc = `${timeActive} (${timeActivePerc}%)`
 
-				titleCell.appendChild(document.createTextNode(title))
-				timeOpenCell.appendChild(document.createTextNode(timeOpen))
-				timeActiveCell.appendChild(document.createTextNode(timeActiveAndPerc))
+				titleEl.classList.add(TRACKER_TITLE_CLASS)
+
+				titleEl.textContent = title
+				timeOpenEl.textContent = timeOpen
+				timeActiveEl.textContent = timeActiveAndPerc
+
+				windowTabsGrid.appendChild(titleEl)
+				windowTabsGrid.appendChild(timeOpenEl)
+				windowTabsGrid.appendChild(timeActiveEl)
 			})
+
+			this.$tabsTracker.appendChild(windowTabsGrid)
 		})
 	},
 

@@ -157,29 +157,51 @@ button.active {
 	display: block;
 }
 
-thead,
-tbody {
-	vertical-align: top;
+.tabs-tracker-header,
+.tabs-tracker-grid {
+	display: grid;
+	grid-template-columns: 3fr 1fr 1fr;
+	grid-gap: 5px 5px;
+	border: 1px solid #fda354;
+	border-radius: 5px;
+	padding: 5px;
 }
 
-th,
-td {
-	font-weight: normal;
-	font-size: 11px;
+.tabs-tracker-header {
+	border: none;
+	margin-bottom: 5px;
+}
+
+.tabs-tracker-header span {
+	text-align: right;
+}
+
+.tabs-tracker-header span:first-child {
 	text-align: left;
 }
 
-tr td:first-child {
-	display: block;
-	width: 160px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+.tabs-tracker-grid {
+	margin-bottom: 10px;
 }
 
-tr {
-	border: 1px solid #000;
-	border-collapse: collapse;
+.tabs-tracker-grid:last-child {
+	margin: 0;
+}
+
+.tabs-tracker-grid span {
+	text-align: right;
+}
+
+.tabs-tracker-grid span.tab-title {
+	text-align: left;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+}
+
+.tabs-tracker-grid span.tab-title:hover {
+	color: #fda354;
 }
 
 #settings.active {
