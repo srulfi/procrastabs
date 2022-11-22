@@ -57,7 +57,12 @@ const Popup = {
 	},
 
 	setEventListeners() {
-		this.$maxTabsInput.addEventListener("change", () => {
+		this.$maxTabsInput.addEventListener("change", (e) => {
+			if (this.$maxTabsInput.value < this.maxTabsInputMin) {
+				// user removed digits resulting in an invalid value
+				this.$maxTabsInput.value = this.maxTabsInputMin
+			}
+
 			if (this.hasExtraTabs()) {
 				this.setStorageItems({ maxTabsEnabled: false, countdownEnabled: false })
 				this.disableMaxTabs()
@@ -94,6 +99,11 @@ const Popup = {
 		})
 
 		this.$countdownInput.addEventListener("change", () => {
+			if (this.$countdownInput.value < this.countdownInputMin) {
+				// user removed digits resulting in an invalid value
+				this.$countdownInput.value = this.countdownInputMin
+			}
+
 			this.setStorageItems({ countdown: Number(this.$countdownInput.value) })
 			this.resetMessage()
 		})
