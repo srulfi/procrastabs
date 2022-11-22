@@ -133,6 +133,7 @@ const Popup = {
 				this.$trackerButton.classList.add(BTN_ACT_CLASS)
 				this.$tabsTracker.classList.add(BTN_ACT_CLASS)
 				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
+				this.$settings.classList.remove(BTN_ACT_CLASS)
 			}
 		})
 
@@ -144,6 +145,7 @@ const Popup = {
 				this.$settingsButton.classList.add(BTN_ACT_CLASS)
 				this.$settings.classList.add(BTN_ACT_CLASS)
 				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
+				this.$tabsTracker.classList.remove(BTN_ACT_CLASS)
 			}
 		})
 	},

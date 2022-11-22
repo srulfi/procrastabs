@@ -124,6 +124,7 @@ input:checked + .switch-label:after {
 
 #message {
 	font-size: 11px;
+	font-style: italic;
 	color: #fff;
 	text-align: right;
 }
@@ -170,7 +171,7 @@ td {
 
 tr td:first-child {
 	display: block;
-	width: 170px;
+	width: 160px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -183,10 +184,12 @@ tr {
 
 #settings.active {
 	display: flex;
+	flex-direction: column;
 }
 
 .settings-option {
 	display: flex;
 	flex: 1;
 	align-items: center;
+	margin-bottom: 10px;
 }
