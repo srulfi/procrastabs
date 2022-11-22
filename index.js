@@ -10,6 +10,7 @@ const Popup = {
 	$countdownInput: document.querySelector("#countdown-input"),
 	$countdownSwitch: document.querySelector("#countdown-switch"),
 	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
+	$suddenDeathSwitch: document.querySelector("#suddendeath-switch"),
 	$message: document.querySelector("#message"),
 	$tabsTracker: document.querySelector("#tabs-tracker"),
 	$settings: document.querySelector("#settings"),
@@ -25,6 +26,7 @@ const Popup = {
 		this.$countdownInput.value = config.countdown
 		this.$countdownSwitch.checked = config.countdownEnabled
 		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
+		this.$suddenDeathSwitch.checked = config.suddenDeath
 
 		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
 		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
@@ -39,13 +41,14 @@ const Popup = {
 
 	async getConfigFromStorage() {
 		try {
-			const config = chrome.storage.sync.get([
+			const config = await chrome.storage.sync.get([
 				"tabs",
 				"maxTabs",
 				"maxTabsEnabled",
 				"countdown",
 				"countdownEnabled",
 				"closeDuplicates",
+				"suddenDeath",
 			])
 			return config
 		} catch (e) {
@@ -122,6 +125,12 @@ const Popup = {
 		this.$closeDuplicatesSwitch.addEventListener("change", () => {
 			this.setStorageItems({
 				closeDuplicates: this.$closeDuplicatesSwitch.checked,
+			})
+		})
+
+		this.$suddenDeathSwitch.addEventListener("change", () => {
+			this.setStorageItems({
+				suddenDeath: this.$suddenDeathSwitch.checked,
 			})
 		})
 

@@ -13,4 +13,5 @@ export default {
 		enabled: false,
 	},
 	closeDuplicates: false,
+	suddenDeath: false,
 }
