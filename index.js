@@ -243,6 +243,10 @@ const Popup = {
 				const timeActiveAndPerc = `${timeActive} (${timeActivePerc}%)`
 
 				titleEl.classList.add(TRACKER_TITLE_CLASS)
+				titleEl.onclick = () => {
+					const { index, windowId } = tab
+					chrome.runtime.sendMessage({ index, windowId })
+				}
 
 				titleEl.textContent = title
 				timeOpenEl.textContent = timeOpen

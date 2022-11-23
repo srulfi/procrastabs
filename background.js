@@ -426,6 +426,11 @@ const ProcrastabsManager = {
 		chrome.tabs.remove(tabIds)
 	},
 
+	highlightTab(index, windowId) {
+		chrome.tabs.highlight({ tabs: index, windowId })
+		chrome.windows.update(windowId, { focused: true })
+	},
+
 	updateBadge() {
 		const tabsRemaining = this.config.maxTabs - this.tabs.length
 		const tabsRemainingText = tabsRemaining === 0 ? "0" : `-${tabsRemaining}`
@@ -534,6 +539,11 @@ const ProcrastabsManager = {
 }
 
 ProcrastabsManager.init()
+
+chrome.runtime.onMessage.addListener((request) => {
+	const { index, windowId } = request
+	ProcrastabsManager.highlightTab(index, windowId)
+})
 
 /*
 	Start of workaround to "persist" service-worker as Chrome terminates all connections after 5 minutes.
