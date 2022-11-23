@@ -69,9 +69,14 @@ const Popup = {
 			}
 
 			if (this.hasExtraTabs()) {
-				this.setStorageItems({ maxTabsEnabled: false, countdownEnabled: false })
+				this.setStorageItems({
+					maxTabsEnabled: false,
+					countdownEnabled: false,
+					suddenDeath: false,
+				})
 				this.disableMaxTabs()
 				this.disableCountdown()
+				this.disableSuddenDeath()
 			}
 
 			this.setStorageItems({ maxTabs: parseInt(this.$maxTabsInput.value) })
@@ -97,8 +102,13 @@ const Popup = {
 					this.setStorageItems({ maxTabsEnabled: true })
 				}
 			} else {
-				this.setStorageItems({ maxTabsEnabled: false, countdownEnabled: false })
+				this.setStorageItems({
+					maxTabsEnabled: false,
+					countdownEnabled: false,
+					suddenDeath: false,
+				})
 				this.disableCountdown()
+				this.disableSuddenDeath()
 				this.resetMessage()
 			}
 		})
@@ -132,8 +142,9 @@ const Popup = {
 					this.enableMaxTabs()
 				}
 			} else {
-				this.setStorageItems({ countdownEnabled: false })
+				this.setStorageItems({ countdownEnabled: false, suddenDeath: false })
 				this.disableCountdown()
+				this.disableSuddenDeath()
 			}
 		})
 
@@ -144,9 +155,17 @@ const Popup = {
 		})
 
 		this.$suddenDeathSwitch.addEventListener("change", () => {
-			this.setStorageItems({
-				suddenDeath: this.$suddenDeathSwitch.checked,
-			})
+			if (this.$suddenDeathSwitch.checked) {
+				this.setStorageItems({
+					maxTabsEnabled: true,
+					countdownEnabled: true,
+					suddenDeath: true,
+				})
+				this.enableMaxTabs()
+				this.enableCountdown()
+			} else {
+				this.setStorageItems({ suddenDeath: false })
+			}
 		})
 
 		this.$trackerButton.addEventListener("click", () => {
@@ -284,6 +303,10 @@ const Popup = {
 
 	disableCountdown() {
 		this.$countdownSwitch.checked = false
+	},
+
+	disableSuddenDeath() {
+		this.$suddenDeathSwitch.checked = false
 	},
 
 	hasExtraTabs() {
