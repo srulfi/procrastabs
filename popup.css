@@ -1,3 +1,7 @@
+html {
+	float: left;
+}
+
 body {
 	background-color: #1f2427;
 	color: #fff;
