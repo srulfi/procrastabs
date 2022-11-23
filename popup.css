@@ -232,6 +232,10 @@ button.active svg {
 	margin-bottom: 10px;
 }
 
+.settings-option:last-child {
+	margin-bottom: 0;
+}
+
 .settings-option-text {
 	width: 100%;
 }
