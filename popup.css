@@ -45,7 +45,7 @@ h1 {
 .config-option-label {
 	width: 100%;
 	margin-bottom: 5px;
-	font-size: 12px;
+	font-size: 13px;
 }
 
 .input-container {
@@ -161,6 +161,10 @@ button.active svg {
 	display: block;
 }
 
+#tabs-tracker span {
+	font-size: 13px;
+}
+
 .tabs-tracker-header,
 .tabs-tracker-grid {
 	display: grid;
@@ -226,7 +230,7 @@ button.active svg {
 }
 
 .settings-option-text p {
-	font-size: 10px;
+	font-size: 11px;
 	font-style: italic;
 	margin: 0;
 	padding: 0;
