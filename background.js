@@ -298,7 +298,7 @@ const ProcrastabsManager = {
 	setWindowsListeners() {
 		chrome.windows.onFocusChanged.addListener(async (windowId) => {
 			if (windowId === -1) {
-				// All Chrome Windows have lost focus
+				// All Chrome windows have lost focus
 				this.tabs = this.tabs.map((tab) => {
 					if (tab.activeAt) {
 						tab.timeActive += Date.now() - tab.activeAt
@@ -333,11 +333,11 @@ const ProcrastabsManager = {
 			for (let [key, { newValue }] of Object.entries(changes)) {
 				this.config[key] = newValue
 				if (
-					key === "maxTabs" ||
+					(key === "maxTabs" && !this.config.suddenDeath) ||
 					key === "maxTabsEnabled" ||
 					key === "countdown" ||
 					key === "countdownEnabled" ||
-					(key === "suddenDeath" && !newValue)
+					(key === "suddenDeath" && !newValue && this.hasTabsLeft())
 				) {
 					this.stopCountdown()
 				}
@@ -360,7 +360,7 @@ const ProcrastabsManager = {
 					this.startCountdown()
 					this.setBadgeCountdownColor()
 					this.setBadgeCountdownInMinutes(this.config.countdown)
-				} else {
+				} else if (!this.config.suddenDeath && this.hasTabsLeft()) {
 					this.updateBadge()
 				}
 			} else {
