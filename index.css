@@ -200,6 +200,7 @@ button.active {
 	cursor: pointer;
 }
 
+.tabs-tracker-grid span.tab-title.active,
 .tabs-tracker-grid span.tab-title:hover {
 	color: #fda354;
 }

@@ -470,6 +470,7 @@ const ProcrastabsManager = {
 			title: tab.title,
 			url: tab.url,
 			createdAt: tab.createdAt,
+			active: tab.active,
 			activeAt: tab.activeAt,
 			timeActive: tab.timeActive,
 		}))
@@ -478,6 +479,15 @@ const ProcrastabsManager = {
 	async syncTabsWithClient() {
 		try {
 			const tabs = this.removeExtraPropsFromTabs(this.tabs)
+			const activeTab = await this.queryActiveTab()
+
+			if (activeTab) {
+				tabs.map((tab) => {
+					tab.active = tab.id === activeTab.id
+					return tab
+				})
+			}
+
 			await chrome.storage.sync.set({ tabs })
 		} catch (e) {
 			console.error(e)

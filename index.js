@@ -1,6 +1,7 @@
 const BTN_ACT_CLASS = "active"
 const TRACKER_CLASS = "tabs-tracker-grid"
 const TRACKER_TITLE_CLASS = "tab-title"
+const TRACKER_TITLE_ACT_CLASS = "active"
 
 const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
 const calculatePercentage = (total, sample) => {
@@ -245,6 +246,8 @@ const Popup = {
 				const timeActiveAndPerc = `${timeActive} (${timeActivePerc}%)`
 
 				titleEl.classList.add(TRACKER_TITLE_CLASS)
+				tab.active && titleEl.classList.add(TRACKER_TITLE_ACT_CLASS)
+
 				titleEl.onclick = () => {
 					const { index, windowId } = tab
 					chrome.runtime.sendMessage({ index, windowId })
