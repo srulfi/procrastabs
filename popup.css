@@ -216,3 +216,14 @@ button.active {
 	align-items: center;
 	margin-bottom: 10px;
 }
+
+.settings-option-text {
+	width: 100%;
+}
+
+.settings-option-text p {
+	font-size: 10px;
+	font-style: italic;
+	margin: 0;
+	padding: 0;
+}
