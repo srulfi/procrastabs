@@ -1,7 +1,7 @@
 body {
 	background-color: #1f2427;
 	color: #fff;
-	width: 250px;
+	width: 280px;
 	margin: 10px;
 	padding: 0;
 	border-radius: 5px;
@@ -43,15 +43,14 @@ h1 {
 }
 
 .config-option-label {
-	width: 100%;
 	margin-bottom: 5px;
 	font-size: 13px;
+	text-align: center;
 }
 
 .input-container {
 	display: flex;
 	flex-direction: row;
-	justify-content: flex-end;
 	align-items: center;
 }
 
