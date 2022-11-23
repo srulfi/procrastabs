@@ -147,6 +147,10 @@ button.active {
 	background: #90ee90;
 }
 
+button.active svg {
+	fill: #1f2427;
+}
+
 #tabs-tracker,
 #settings {
 	display: none;
