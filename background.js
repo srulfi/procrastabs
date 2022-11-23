@@ -470,7 +470,6 @@ const ProcrastabsManager = {
 			title: tab.title,
 			url: tab.url,
 			createdAt: tab.createdAt,
-			active: tab.active,
 			activeAt: tab.activeAt,
 			timeActive: tab.timeActive,
 		}))
