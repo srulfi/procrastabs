@@ -3,8 +3,10 @@ const TRACKER_CLASS = "tabs-tracker-grid"
 const TRACKER_TITLE_CLASS = "tab-title"
 
 const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
-const calculatePercentage = (total, sample) =>
-	Math.round((sample * 100) / total)
+const calculatePercentage = (total, sample) => {
+	const perc = (sample * 100) / total
+	return isNaN(perc) ? 0 : Math.round(perc)
+}
 
 const Popup = {
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
