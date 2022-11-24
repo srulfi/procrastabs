@@ -210,6 +210,11 @@ const Popup = {
 					case "tabs":
 						this.tabs = newValue
 						this.populateTracker()
+						if (this.hasExtraTabs()) {
+							this.displayTabsMessage()
+						} else {
+							this.resetMessage()
+						}
 						break
 
 					default:
