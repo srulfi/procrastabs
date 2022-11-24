@@ -140,6 +140,7 @@ const Popup = {
 				} else {
 					this.setStorageItems({ maxTabsEnabled: true, countdownEnabled: true })
 					this.enableMaxTabs()
+					this.resetMessage()
 				}
 			} else {
 				this.setStorageItems({ countdownEnabled: false, suddenDeath: false })
@@ -152,17 +153,24 @@ const Popup = {
 			this.setStorageItems({
 				closeDuplicates: this.$closeDuplicatesSwitch.checked,
 			})
+			this.resetMessage()
 		})
 
 		this.$suddenDeathSwitch.addEventListener("change", () => {
 			if (this.$suddenDeathSwitch.checked) {
-				this.setStorageItems({
-					maxTabsEnabled: true,
-					countdownEnabled: true,
-					suddenDeath: true,
-				})
-				this.enableMaxTabs()
-				this.enableCountdown()
+				if (this.hasExtraTabs()) {
+					this.disableSuddenDeath()
+					this.displayTabsMessage()
+				} else {
+					this.setStorageItems({
+						maxTabsEnabled: true,
+						countdownEnabled: true,
+						suddenDeath: true,
+					})
+					this.enableMaxTabs()
+					this.enableCountdown()
+					this.resetMessage()
+				}
 			} else {
 				this.setStorageItems({ suddenDeath: false })
 			}
@@ -178,6 +186,7 @@ const Popup = {
 				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
 				this.$settings.classList.remove(BTN_ACT_CLASS)
 			}
+			this.resetMessage()
 		})
 
 		this.$settingsButton.addEventListener("click", () => {
@@ -190,6 +199,7 @@ const Popup = {
 				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
 				this.$tabsTracker.classList.remove(BTN_ACT_CLASS)
 			}
+			this.resetMessage()
 		})
 	},
 
