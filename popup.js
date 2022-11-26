@@ -3,10 +3,26 @@ const TRACKER_CLASS = "tabs-tracker-grid"
 const TRACKER_TITLE_CLASS = "tab-title"
 const TRACKER_TITLE_ACT_CLASS = "active"
 
-const milliToMin = (milliseconds) => Math.floor(milliseconds / 1000 / 60)
 const calculatePercentage = (total, sample) => {
 	const perc = (sample * 100) / total
 	return isNaN(perc) ? 0 : Math.round(perc)
+}
+
+const convertToDHM = (milliseconds) => {
+	let minutes = Math.floor(milliseconds / 60000)
+	let hours = Math.floor(minutes / 60)
+	let days = Math.floor(hours / 24)
+
+	minutes = minutes % 60
+	hours = hours % 24
+
+	const daysOutput = days ? `${days}d` : ""
+	const hoursOutput = hours ? `${hours}h` : ""
+	const minutesOutput = minutes ? `${minutes}m` : ""
+
+	return days || hours || minutes
+		? `${daysOutput} ${hoursOutput} ${minutesOutput}`
+		: "0m"
 }
 
 const Popup = {
@@ -274,13 +290,11 @@ const Popup = {
 				const timeOpenEl = document.createElement("span")
 				const timeActiveEl = document.createElement("span")
 
-				const title = tab.title
-				const timeOpen = milliToMin(Date.now() - tab.createdAt)
+				const timeOpen = Date.now() - tab.createdAt
 				const timeActive = tab.activeAt
-					? milliToMin(tab.timeActive + Date.now() - tab.activeAt)
-					: milliToMin(tab.timeActive)
+					? tab.timeActive + Date.now() - tab.activeAt
+					: tab.timeActive
 				const timeActivePerc = calculatePercentage(timeOpen, timeActive)
-				const timeActiveAndPerc = `${timeActive} (${timeActivePerc}%)`
 
 				titleEl.classList.add(TRACKER_TITLE_CLASS)
 				tab.active && titleEl.classList.add(TRACKER_TITLE_ACT_CLASS)
@@ -294,9 +308,11 @@ const Popup = {
 					})
 				}
 
-				titleEl.textContent = title
-				timeOpenEl.textContent = timeOpen
-				timeActiveEl.textContent = timeActiveAndPerc
+				titleEl.textContent = tab.title
+				timeOpenEl.textContent = convertToDHM(timeOpen)
+				timeActiveEl.textContent = `${convertToDHM(
+					timeActive
+				)} (${timeActivePerc}%)`
 
 				windowTabsGrid.appendChild(titleEl)
 				windowTabsGrid.appendChild(timeOpenEl)
