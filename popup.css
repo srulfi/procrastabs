@@ -5,7 +5,7 @@ html {
 body {
 	background-color: #1f2427;
 	color: #fff;
-	width: 280px;
+	width: 350px;
 	margin: 10px;
 	padding: 0;
 	border-radius: 5px;
@@ -13,7 +13,9 @@ body {
 
 h1 {
 	font-size: 14px;
-	margin: 0 0 10px;
+	line-height: 14px;
+	text-align: right;
+	margin: 0 0 12px;
 }
 
 #parent-container {
@@ -26,13 +28,13 @@ h1 {
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
-	width: 100%;
 	border-bottom: 1px solid #90ee90;
 }
 
 .config-option-container {
 	display: flex;
 	flex-direction: column;
+	align-items: flex-end;
 	width: 100%;
 	padding: 10px 0;
 }
@@ -48,8 +50,7 @@ h1 {
 
 .config-option-label {
 	margin-bottom: 5px;
-	font-size: 13px;
-	text-align: center;
+	font-size: 12px;
 }
 
 .input-container {
