@@ -383,6 +383,17 @@ const ProcrastabsManager = {
 		})
 	},
 
+	resetActivity() {
+		this.tabs = this.tabs.map((tab) => ({
+			...tab,
+			createdAt: Date.now(),
+			activeAt: null,
+			timeActive: 0,
+		}))
+
+		this.syncTabsWithClient()
+	},
+
 	startCountdown() {
 		let countdownInSeconds = this.config.countdown * 60
 		let secondsPast = 0
@@ -549,9 +560,12 @@ const ProcrastabsManager = {
 
 ProcrastabsManager.init()
 
-chrome.runtime.onMessage.addListener((request) => {
-	const { index, windowId } = request
-	ProcrastabsManager.highlightTab(index, windowId)
+chrome.runtime.onMessage.addListener((req) => {
+	if (req.id === "tracker-tab-click") {
+		ProcrastabsManager.highlightTab(req.index, req.windowId)
+	} else if (req.id === "tracker-reset") {
+		ProcrastabsManager.resetActivity()
+	}
 })
 
 /*

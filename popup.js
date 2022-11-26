@@ -21,6 +21,7 @@ const Popup = {
 	$settings: document.querySelector("#settings"),
 	$trackerButton: document.querySelector("#tracker-button"),
 	$settingsButton: document.querySelector("#settings-button"),
+	$resetTrackerButton: document.querySelector("#tracker-reset-button"),
 
 	async init() {
 		const config = await this.getConfigFromStorage()
@@ -201,6 +202,10 @@ const Popup = {
 			}
 			this.resetMessage()
 		})
+
+		this.$resetTrackerButton.addEventListener("click", () => {
+			chrome.runtime.sendMessage({ id: "tracker-reset" })
+		})
 	},
 
 	setStorageListeners() {
@@ -284,7 +289,11 @@ const Popup = {
 
 				titleEl.onclick = () => {
 					const { index, windowId } = tab
-					chrome.runtime.sendMessage({ index, windowId })
+					chrome.runtime.sendMessage({
+						id: "tracker-tab-click",
+						index,
+						windowId,
+					})
 				}
 
 				titleEl.textContent = title

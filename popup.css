@@ -138,7 +138,7 @@ input:checked + .switch-label:after {
 	height: 100%;
 }
 
-button {
+#buttons-container button {
 	width: 30px;
 	cursor: pointer;
 	border: none;
@@ -147,7 +147,7 @@ button {
 	padding: 0;
 }
 
-button.active {
+#buttons-container button.active {
 	background: #90ee90;
 }
 
@@ -167,6 +167,25 @@ button.active svg {
 
 #tabs-tracker span {
 	font-size: 12px;
+}
+
+#tabs-tracker button {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	font-size: 12px;
+	color: #fff;
+	padding: 5px;
+	border: 1px solid #fff;
+	border-radius: 5px;
+	cursor: pointer;
+	background: none;
+}
+
+#tabs-tracker button:hover {
+	color: #1f2427;
+	background: #90ee90;
+	border-color: #90ee90;
 }
 
 .tabs-tracker-header,
@@ -200,7 +219,7 @@ button.active svg {
 }
 
 .tabs-tracker-grid:last-child {
-	margin: 0;
+	margin-bottom: 35px;
 }
 
 .tabs-tracker-grid span {
