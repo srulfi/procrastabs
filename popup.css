@@ -21,14 +21,14 @@ h1 {
 #parent-container {
 	display: flex;
 	flex-direction: column;
-	border-top: 1px solid #90ee90;
+	border-top: 1px solid #1cd155;
 }
 
 #config-container {
 	display: flex;
 	flex-direction: row;
 	justify-content: center;
-	border-bottom: 1px solid #90ee90;
+	border-bottom: 1px solid #1cd155;
 }
 
 .config-option-container {
@@ -41,7 +41,7 @@ h1 {
 
 .config-option-container:first-child {
 	padding-right: 10px;
-	border-right: 1px solid #90ee90;
+	border-right: 1px solid #1cd155;
 }
 
 .config-option-container:last-child {
@@ -106,7 +106,7 @@ input:focus-visible {
 }
 
 input:checked + .switch-label {
-	background: #90ee90;
+	background: #1cd155;
 }
 
 input:checked + .switch-label:after {
@@ -124,7 +124,7 @@ input:checked + .switch-label:after {
 	justify-content: space-between;
 	align-items: center;
 	height: 30px;
-	border-bottom: 1px solid #90ee90;
+	border-bottom: 1px solid #1cd155;
 }
 
 #message {
@@ -149,7 +149,7 @@ input:checked + .switch-label:after {
 }
 
 #buttons-container button.active {
-	background: #90ee90;
+	background: #1cd155;
 }
 
 button.active svg {
@@ -185,8 +185,8 @@ button.active svg {
 
 #tabs-tracker button:hover {
 	color: #1f2427;
-	background: #90ee90;
-	border-color: #90ee90;
+	background: #1cd155;
+	border-color: #1cd155;
 }
 
 .tabs-tracker-header,
@@ -194,7 +194,7 @@ button.active svg {
 	display: grid;
 	grid-template-columns: 3fr 1fr 1fr;
 	grid-gap: 5px 5px;
-	border: 1px solid #90ee90;
+	border: 1px solid #1cd155;
 	border-radius: 5px;
 	padding: 5px;
 }
@@ -237,7 +237,7 @@ button.active svg {
 
 .tabs-tracker-grid span.tab-title.active,
 .tabs-tracker-grid span.tab-title:hover {
-	color: #90ee90;
+	color: #1cd155;
 }
 
 #settings.active {

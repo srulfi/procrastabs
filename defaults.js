@@ -1,6 +1,6 @@
 export default {
 	badge: {
-		baseColor: "#90EE90",
+		baseColor: "#1CD155",
 		countdownColor: "#B81D13",
 		countdownEnabled: true,
 	},
