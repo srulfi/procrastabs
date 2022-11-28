@@ -200,7 +200,7 @@ const ProcrastabsManager = {
 			this.syncTabsWithClient()
 		})
 
-		chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+		chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 			const { isWindowClosing, windowId } = removeInfo
 
 			if (isWindowClosing) {
@@ -208,9 +208,15 @@ const ProcrastabsManager = {
 					(tab) => tab.windowId !== windowId && tab.id !== tabId
 				)
 			} else {
-				const removedTabIndex = this.tabs.findIndex((tab) => tab.id === tabId)
+				let removedTabIndex
+				this.tabs = this.tabs.filter((tab) => {
+					if (tab.id === tabId) {
+						removedTabIndex = tab.index
+						return false
+					}
+					return true
+				})
 
-				this.tabs.splice(removedTabIndex, 1)
 				this.tabs = this.tabs.map((tab) => {
 					if (tab.windowId === windowId && tab.index > removedTabIndex) {
 						tab.index -= 1
@@ -256,8 +262,20 @@ const ProcrastabsManager = {
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					tab.index = toIndex
-				} else if (tab.windowId === windowId && tab.index === toIndex) {
-					tab.index = fromIndex
+				} else if (tab.windowId === windowId) {
+					if (
+						fromIndex < toIndex &&
+						tab.index > fromIndex &&
+						tab.index <= toIndex
+					) {
+						tab.index -= 1
+					} else if (
+						fromIndex > toIndex &&
+						tab.index >= toIndex &&
+						tab.index < fromIndex
+					) {
+						tab.index += 1
+					}
 				}
 				return tab
 			})
