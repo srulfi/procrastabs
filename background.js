@@ -13,7 +13,7 @@ const ProcrastabsManager = {
 		countdown: defaults.countdown.value,
 		countdownEnabled: defaults.countdown.enabled,
 		closeDuplicates: defaults.closeDuplicates,
-		suddenDeath: defaults.suddenDeath,
+		killAll: defaults.killAll,
 	},
 
 	async init() {
@@ -77,7 +77,7 @@ const ProcrastabsManager = {
 		if (
 			config.countdownEnabled &&
 			(this.tabs.length === this.config.maxTabs ||
-				(config.suddenDeath && this.tabs.length < this.config.maxTabs))
+				(config.killAll && this.tabs.length < this.config.maxTabs))
 		) {
 			this.startCountdown()
 			this.setBadgeCountdownColor()
@@ -115,7 +115,7 @@ const ProcrastabsManager = {
 				"countdown",
 				"countdownEnabled",
 				"closeDuplicates",
-				"suddenDeath",
+				"killAll",
 			])
 			return config
 		} catch (e) {
@@ -224,7 +224,7 @@ const ProcrastabsManager = {
 					this.stopCountdown()
 				}
 
-				if (this.config.suddenDeath) {
+				if (this.config.killAll) {
 					this.startCountdown()
 				}
 			}
@@ -333,11 +333,11 @@ const ProcrastabsManager = {
 			for (let [key, { newValue }] of Object.entries(changes)) {
 				this.config[key] = newValue
 				if (
-					(key === "maxTabs" && !this.config.suddenDeath) ||
+					(key === "maxTabs" && !this.config.killAll) ||
 					key === "maxTabsEnabled" ||
 					key === "countdown" ||
 					key === "countdownEnabled" ||
-					(key === "suddenDeath" && !newValue && this.hasTabsLeft())
+					(key === "killAll" && !newValue && this.hasTabsLeft())
 				) {
 					this.stopCountdown()
 				}
@@ -353,14 +353,11 @@ const ProcrastabsManager = {
 			}
 
 			if (this.config.countdownEnabled) {
-				if (
-					(!this.hasTabsLeft() || this.config.suddenDeath) &&
-					!this.countdownOn
-				) {
+				if ((!this.hasTabsLeft() || this.config.killAll) && !this.countdownOn) {
 					this.startCountdown()
 					this.setBadgeCountdownColor()
 					this.setBadgeCountdownInMinutes(this.config.countdown)
-				} else if (!this.config.suddenDeath && this.hasTabsLeft()) {
+				} else if (!this.config.killAll && this.hasTabsLeft()) {
 					this.updateBadge()
 				}
 			} else {
@@ -407,7 +404,7 @@ const ProcrastabsManager = {
 			const secondsRemaining = countdownInSeconds - secondsPast
 
 			if (secondsPast === countdownInSeconds) {
-				if (!this.hasTabsLeft() || this.config.suddenDeath) {
+				if (!this.hasTabsLeft() || this.config.killAll) {
 					const activeTab = await this.queryActiveTab()
 					if (activeTab) {
 						this.removeTabsById([activeTab.id])
@@ -514,7 +511,7 @@ const ProcrastabsManager = {
 				countdown: this.config.countdown,
 				countdownEnabled: this.config.countdownEnabled,
 				closeDuplicates: this.config.closeDuplicates,
-				suddenDeath: this.config.suddenDeath,
+				killAll: this.config.killAll,
 			})
 			this.updateBadge()
 		} catch (e) {
