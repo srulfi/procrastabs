@@ -31,7 +31,7 @@ const Popup = {
 	$countdownInput: document.querySelector("#countdown-input"),
 	$countdownSwitch: document.querySelector("#countdown-switch"),
 	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
-	$killAllSwitch: document.querySelector("#killall-switch"),
+	$killAllModeSwitch: document.querySelector("#killallmode-switch"),
 	$message: document.querySelector("#message"),
 	$tabsTracker: document.querySelector("#tabs-tracker"),
 	$settings: document.querySelector("#settings"),
@@ -48,7 +48,7 @@ const Popup = {
 		this.$countdownInput.value = config.countdown
 		this.$countdownSwitch.checked = config.countdownEnabled
 		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
-		this.$killAllSwitch.checked = config.killAll
+		this.$killAllModeSwitch.checked = config.killAllMode
 
 		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
 		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
@@ -70,7 +70,7 @@ const Popup = {
 				"countdown",
 				"countdownEnabled",
 				"closeDuplicates",
-				"killAll",
+				"killAllMode",
 			])
 			return config
 		} catch (e) {
@@ -89,11 +89,11 @@ const Popup = {
 				this.setStorageItems({
 					maxTabsEnabled: false,
 					countdownEnabled: false,
-					killAll: false,
+					killAllMode: false,
 				})
 				this.disableMaxTabs()
 				this.disableCountdown()
-				this.disableKillAll()
+				this.disableKillAllMode()
 			}
 
 			this.setStorageItems({ maxTabs: parseInt(this.$maxTabsInput.value) })
@@ -122,10 +122,10 @@ const Popup = {
 				this.setStorageItems({
 					maxTabsEnabled: false,
 					countdownEnabled: false,
-					killAll: false,
+					killAllMode: false,
 				})
 				this.disableCountdown()
-				this.disableKillAll()
+				this.disableKillAllMode()
 				this.resetMessage()
 			}
 		})
@@ -160,9 +160,9 @@ const Popup = {
 					this.resetMessage()
 				}
 			} else {
-				this.setStorageItems({ countdownEnabled: false, killAll: false })
+				this.setStorageItems({ countdownEnabled: false, killAllMode: false })
 				this.disableCountdown()
-				this.disableKillAll()
+				this.disableKillAllMode()
 			}
 		})
 
@@ -173,23 +173,23 @@ const Popup = {
 			this.resetMessage()
 		})
 
-		this.$killAllSwitch.addEventListener("change", () => {
-			if (this.$killAllSwitch.checked) {
+		this.$killAllModeSwitch.addEventListener("change", () => {
+			if (this.$killAllModeSwitch.checked) {
 				if (this.hasExtraTabs()) {
-					this.disableKillAll()
+					this.disableKillAllMode()
 					this.displayTabsMessage()
 				} else {
 					this.setStorageItems({
 						maxTabsEnabled: true,
 						countdownEnabled: true,
-						killAll: true,
+						killAllMode: true,
 					})
 					this.enableMaxTabs()
 					this.enableCountdown()
 					this.resetMessage()
 				}
 			} else {
-				this.setStorageItems({ killAll: false })
+				this.setStorageItems({ killAllMode: false })
 			}
 		})
 
@@ -343,8 +343,8 @@ const Popup = {
 		this.$countdownSwitch.checked = false
 	},
 
-	disableKillAll() {
-		this.$killAllSwitch.checked = false
+	disableKillAllMode() {
+		this.$killAllModeSwitch.checked = false
 	},
 
 	hasExtraTabs() {

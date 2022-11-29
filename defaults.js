@@ -13,5 +13,5 @@ export default {
 		enabled: false,
 	},
 	closeDuplicates: false,
-	killAll: false,
+	killAllMode: false,
 }
