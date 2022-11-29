@@ -297,7 +297,7 @@ const Popup = {
 				const timeActivePerc = calculatePercentage(timeOpen, timeActive)
 
 				titleEl.classList.add(TRACKER_TITLE_CLASS)
-				tab.active && titleEl.classList.add(TRACKER_TITLE_ACT_CLASS)
+				tab.activeAt && titleEl.classList.add(TRACKER_TITLE_ACT_CLASS)
 
 				titleEl.onclick = () => {
 					const { index, windowId } = tab

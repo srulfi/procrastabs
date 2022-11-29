@@ -18,11 +18,10 @@ const ProcrastabsManager = {
 
 	async init() {
 		const tabs = await this.queryTabs()
-		const activeTab = await this.queryActiveTab()
+		const windowId = await this.getCurrentWindowId()
 		const config = await this.getConfigFromStorage()
 
 		const { tabs: storageTabs } = config
-		let storageTab
 
 		if (!config.maxTabs) {
 			config.maxTabs = tabs.length
@@ -33,30 +32,28 @@ const ProcrastabsManager = {
 
 		this.tabs = tabs.map((currentTab) => {
 			if (storageTabs) {
-				storageTab = storageTabs.find((sTab) => sTab.id === currentTab.id)
-			}
+				const storageTab = storageTabs.find((sTab) => sTab.id === currentTab.id)
 
-			const tab = storageTab || currentTab
+				if (storageTab) {
+					if (storageTab.activeAt) {
+						// service worker reconnected OR extension was reinstalled
+						storageTab.timeActive += Date.now() - storageTab.activeAt
+					}
 
-			if (tab.activeAt) {
-				// session was closed before resetting tab activation timestamp
-				tab.timeActive += Date.now() - tab.activeAt
-				tab.activeAt = null
-			}
+					storageTab.activeAt =
+						currentTab.active && currentTab.windowId === windowId
+							? Date.now()
+							: null
 
-			if (activeTab) {
-				const { id: activeTabId, windowId: activetWindowId } = activeTab
-				if (tab.id === activeTabId && tab.windowId === activetWindowId) {
-					tab.activeAt = Date.now()
+					return {
+						...currentTab,
+						...storageTab,
+					}
 				}
 			}
 
-			if (storageTab) {
-				return tab
-			}
-
 			return {
-				...tab,
+				...currentTab,
 				createdAt: Date.now(),
 				timeActive: 0,
 			}
@@ -101,6 +98,15 @@ const ProcrastabsManager = {
 				lastFocusedWindow: true,
 			})
 			return tab
+		} catch (e) {
+			console.error(e)
+		}
+	},
+
+	async getCurrentWindowId() {
+		try {
+			const { id } = await chrome.windows.getCurrent()
+			return id
 		} catch (e) {
 			console.error(e)
 		}
@@ -243,7 +249,7 @@ const ProcrastabsManager = {
 			this.bypassSync = false
 		})
 
-		chrome.tabs.onActivated.addListener(async ({ tabId, windowId }) => {
+		chrome.tabs.onActivated.addListener(({ tabId, windowId }) => {
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					// update windowId in case tab got activated after being detached from window
@@ -488,8 +494,8 @@ const ProcrastabsManager = {
 		chrome.action.setBadgeBackgroundColor({ color })
 	},
 
-	removeExtraPropsFromTabs(tabs) {
-		return tabs.map((tab) => ({
+	removeExtraPropsFromTabs() {
+		return this.tabs.map((tab) => ({
 			id: tab.id,
 			windowId: tab.windowId,
 			index: tab.index,
@@ -503,16 +509,7 @@ const ProcrastabsManager = {
 
 	async syncTabsWithClient() {
 		try {
-			const tabs = this.removeExtraPropsFromTabs(this.tabs)
-			const activeTab = await this.queryActiveTab()
-
-			if (activeTab) {
-				tabs.map((tab) => {
-					tab.active = tab.id === activeTab.id
-					return tab
-				})
-			}
-
+			const tabs = this.removeExtraPropsFromTabs()
 			await chrome.storage.sync.set({ tabs })
 		} catch (e) {
 			console.error(e)
@@ -521,7 +518,7 @@ const ProcrastabsManager = {
 
 	async syncWithClient() {
 		try {
-			const tabs = this.removeExtraPropsFromTabs(this.tabs)
+			const tabs = this.removeExtraPropsFromTabs()
 			await chrome.storage.sync.set({
 				tabs,
 				maxTabs: this.config.maxTabs,
