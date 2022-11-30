@@ -158,7 +158,7 @@ const ProcrastabsManager = {
 				}
 
 				if (this.config.countdownEnabled) {
-					if (this.hasTabsLeft()) {
+					if (!this.config.killAllMode && this.hasTabsLeft()) {
 						this.stopCountdown()
 						this.updateBadge()
 					} else if (!this.countdownOn) {
