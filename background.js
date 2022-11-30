@@ -232,12 +232,15 @@ const ProcrastabsManager = {
 			}
 
 			if (this.config.countdownEnabled) {
-				if (this.hasTabsLeft()) {
-					this.stopCountdown()
-				}
-
 				if (this.config.killAllMode) {
-					this.startCountdown()
+					if (this.countdownOn) {
+						this.syncTabsWithClient()
+						return // prevent updating badge below
+					} else {
+						this.startCountdown()
+					}
+				} else if (this.hasTabsLeft()) {
+					this.stopCountdown()
 				}
 			}
 
