@@ -265,6 +265,15 @@ const ProcrastabsManager = {
 			this.syncTabsWithClient()
 		})
 
+		/*
+			onMoved behaviour considerations:
+				- if the user moves the tab within the window, it will fire once per tab position shift.
+				eg: a tab that is moved from position 1 to 3 will output
+				{ ..., fromIndex: 1, toIndex: 2 }, { ..., fromIndex: 2, toIndex: 3 }
+				- if the user attaches the tab from another window, it will fire only once.
+				eg: a tab that is attached to the 3rd position of the window will output
+				{ ..., fromIndex: 0, toIndex: 3 }
+		*/
 		chrome.tabs.onMoved.addListener((tabId, moveInfo) => {
 			const { windowId, fromIndex, toIndex } = moveInfo
 
@@ -272,18 +281,12 @@ const ProcrastabsManager = {
 				if (tab.id === tabId) {
 					tab.index = toIndex
 				} else if (tab.windowId === windowId) {
-					if (
-						fromIndex < toIndex &&
-						tab.index > fromIndex &&
-						tab.index <= toIndex
-					) {
-						tab.index -= 1
-					} else if (
-						fromIndex > toIndex &&
-						tab.index >= toIndex &&
-						tab.index < fromIndex
-					) {
-						tab.index += 1
+					if (toIndex - fromIndex > 1) {
+						if (tab.index <= toIndex) {
+							tab.index -= 1
+						}
+					} else if (tab.index === toIndex) {
+						tab.index = fromIndex
 					}
 				}
 				return tab
