@@ -299,6 +299,10 @@ const Popup = {
 				titleEl.classList.add(TRACKER_TITLE_CLASS)
 				tab.activeAt && titleEl.classList.add(TRACKER_TITLE_ACT_CLASS)
 
+				titleEl.style.backgroundImage = `url('chrome-extension://${
+					chrome.runtime.id
+				}/_favicon/?pageUrl=${encodeURIComponent(tab.url)}&size=14')`
+
 				titleEl.onclick = () => {
 					const { index, windowId } = tab
 					chrome.runtime.sendMessage({

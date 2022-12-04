@@ -192,7 +192,7 @@ button.active svg {
 .tabs-tracker-header,
 .tabs-tracker-grid {
 	display: grid;
-	grid-template-columns: 3fr 1.2fr 1fr;
+	grid-template-columns: 3fr 1.2fr 1.2fr;
 	grid-gap: 5px 5px;
 	border: 1px solid #1cd155;
 	border-radius: 5px;
@@ -233,6 +233,8 @@ button.active svg {
 	white-space: nowrap;
 	overflow: hidden;
 	cursor: pointer;
+	background-repeat: no-repeat;
+	padding-left: 17px;
 }
 
 .tabs-tracker-grid span.tab-title.active,

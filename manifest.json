@@ -3,7 +3,7 @@
 	"name": "Procrastabs",
 	"version": "1.0.0",
 	"description": "Limits the number of open tabs",
-	"permissions": ["windows", "tabs", "storage", "scripting"],
+	"permissions": ["windows", "tabs", "storage", "scripting", "favicon"],
 	"host_permissions": ["<all_urls>"],
 	"action": {
 		"default_popup": "popup.html"
