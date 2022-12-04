@@ -91,7 +91,7 @@ const ProcrastabsManager = {
 		}
 	},
 
-	async queryActiveTab() {
+	async queryCurrentTab() {
 		try {
 			const [tab] = await chrome.tabs.query({
 				active: true,
@@ -339,9 +339,9 @@ const ProcrastabsManager = {
 				this.stopCountdown()
 				this.updateBadge()
 			} else {
-				const activeTab = await this.queryActiveTab()
-				if (activeTab && activeTab.windowId === windowId) {
-					this.updateActivityOnTabChange(activeTab.id)
+				const currentTab = await this.queryCurrentTab()
+				if (currentTab && currentTab.windowId === windowId) {
+					this.updateActivityOnTabChange(currentTab.id)
 				}
 
 				if (
@@ -438,9 +438,9 @@ const ProcrastabsManager = {
 
 			if (secondsPast === countdownInSeconds) {
 				if (!this.hasTabsLeft() || this.config.killAllMode) {
-					const activeTab = await this.queryActiveTab()
-					if (activeTab) {
-						this.removeTabsById([activeTab.id])
+					const currentTab = await this.queryCurrentTab()
+					if (currentTab) {
+						this.removeTabsById([currentTab.id])
 					} else {
 						this.stopCountdown()
 						this.updateBadge()
