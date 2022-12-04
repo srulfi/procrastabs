@@ -33,9 +33,13 @@ const Popup = {
 	$closeDuplicatesSwitch: document.querySelector("#duplicates-switch"),
 	$killAllModeSwitch: document.querySelector("#killallmode-switch"),
 	$message: document.querySelector("#message"),
+	$panels: document.querySelectorAll(".panel"),
+	$panelButtons: document.querySelectorAll(".panel-button"),
 	$tabsTracker: document.querySelector("#tabs-tracker"),
+	$tabsStats: document.querySelector("#tabs-stats"),
 	$settings: document.querySelector("#settings"),
 	$trackerButton: document.querySelector("#tracker-button"),
+	$statsButton: document.querySelector("#stats-button"),
 	$settingsButton: document.querySelector("#settings-button"),
 	$resetTrackerButton: document.querySelector("#tracker-reset-button"),
 
@@ -198,10 +202,27 @@ const Popup = {
 				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
 				this.$tabsTracker.classList.remove(BTN_ACT_CLASS)
 			} else {
-				this.$trackerButton.classList.add(BTN_ACT_CLASS)
+				this.$panels.forEach(($panel) => $panel.classList.remove(BTN_ACT_CLASS))
+				this.$panelButtons.forEach(($panelButton) =>
+					$panelButton.classList.remove(BTN_ACT_CLASS)
+				)
 				this.$tabsTracker.classList.add(BTN_ACT_CLASS)
-				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
-				this.$settings.classList.remove(BTN_ACT_CLASS)
+				this.$trackerButton.classList.add(BTN_ACT_CLASS)
+			}
+			this.resetMessage()
+		})
+
+		this.$statsButton.addEventListener("click", () => {
+			if (this.$statsButton.classList.contains(BTN_ACT_CLASS)) {
+				this.$statsButton.classList.remove(BTN_ACT_CLASS)
+				this.$tabsStats.classList.remove(BTN_ACT_CLASS)
+			} else {
+				this.$panels.forEach(($panel) => $panel.classList.remove(BTN_ACT_CLASS))
+				this.$panelButtons.forEach(($panelButton) =>
+					$panelButton.classList.remove(BTN_ACT_CLASS)
+				)
+				this.$tabsStats.classList.add(BTN_ACT_CLASS)
+				this.$statsButton.classList.add(BTN_ACT_CLASS)
 			}
 			this.resetMessage()
 		})
@@ -211,10 +232,12 @@ const Popup = {
 				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
 				this.$settings.classList.remove(BTN_ACT_CLASS)
 			} else {
-				this.$settingsButton.classList.add(BTN_ACT_CLASS)
+				this.$panels.forEach(($panel) => $panel.classList.remove(BTN_ACT_CLASS))
+				this.$panelButtons.forEach(($panelButton) =>
+					$panelButton.classList.remove(BTN_ACT_CLASS)
+				)
 				this.$settings.classList.add(BTN_ACT_CLASS)
-				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
-				this.$tabsTracker.classList.remove(BTN_ACT_CLASS)
+				this.$settingsButton.classList.add(BTN_ACT_CLASS)
 			}
 			this.resetMessage()
 		})

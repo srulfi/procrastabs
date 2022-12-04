@@ -156,14 +156,14 @@ button.active svg {
 	fill: #1f2427;
 }
 
-#tabs-tracker,
-#settings {
+.panel {
 	display: none;
 	margin-top: 10px;
 }
 
-#tabs-tracker.active {
-	display: block;
+.panel.active {
+	display: flex;
+	flex-direction: column;
 }
 
 #tabs-tracker span {
@@ -240,11 +240,6 @@ button.active svg {
 .tabs-tracker-grid span.tab-title.active,
 .tabs-tracker-grid span.tab-title:hover {
 	color: #1cd155;
-}
-
-#settings.active {
-	display: flex;
-	flex-direction: column;
 }
 
 .settings-option {

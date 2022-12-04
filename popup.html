@@ -34,7 +34,7 @@
 			<div id="bottom-bar">
 				<p id="message"></p>
 				<div id="buttons-container">
-					<button id="tracker-button">
+					<button id="tracker-button" class="panel-button">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							height="30px"
@@ -48,7 +48,7 @@
 							/>
 						</svg>
 					</button>
-					<button id="stats-button">
+					<button id="stats-button" class="panel-button">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							height="24px"
@@ -61,7 +61,7 @@
 							/>
 						</svg>
 					</button>
-					<button id="settings-button">
+					<button id="settings-button" class="panel-button">
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
 							height="22px"
@@ -79,7 +79,7 @@
 					</button>
 				</div>
 			</div>
-			<div id="tabs-tracker">
+			<div id="tabs-tracker" class="panel">
 				<div class="tabs-tracker-header">
 					<span>Tab</span>
 					<span>Open</span>
@@ -87,7 +87,8 @@
 				</div>
 				<button id="tracker-reset-button">Reset activity</button>
 			</div>
-			<div id="settings">
+			<div id="tabs-stats" class="panel"></div>
+			<div id="settings" class="panel">
 				<div class="settings-option">
 					<div class="settings-option-text">
 						<label for="duplicates-switch" class="config-option-label"
