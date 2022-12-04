@@ -340,7 +340,7 @@ const ProcrastabsManager = {
 				this.updateBadge()
 			} else {
 				const activeTab = await this.queryActiveTab()
-				if (activeTab) {
+				if (activeTab && activeTab.windowId === windowId) {
 					this.updateActivityOnTabChange(activeTab.id)
 				}
 
