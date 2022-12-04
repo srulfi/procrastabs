@@ -178,10 +178,20 @@ const ProcrastabsManager = {
 			this.tabs = this.tabs.map((tab) => {
 				if (tab.id === tabId) {
 					if (updates.url && tab.url && updates.url !== tab.url) {
-						// tab changed its url
-						tab.createdAt = Date.now()
-						tab.activeAt = Date.now()
-						tab.timeActive = 0
+						const { host: tabHost, pathname: tabPathname } = new URL(tab.url)
+						const { host: updatesHost, pathname: updatesPathname } = new URL(
+							updates.url
+						)
+						const tabUrlWithoutParams = tabHost + tabPathname
+						const updatesUrlWithoutParams = updatesHost + updatesPathname
+
+						// only account for url change if host and pathname are different.
+						// don't account for url change if search params are different.
+						if (tabUrlWithoutParams !== updatesUrlWithoutParams) {
+							tab.createdAt = Date.now()
+							tab.activeAt = Date.now()
+							tab.timeActive = 0
+						}
 					}
 
 					return { ...tab, ...updates }
