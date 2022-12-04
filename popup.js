@@ -368,4 +368,7 @@ const Popup = {
 	},
 }
 
-window.onload = () => Popup.init()
+window.onload = () => {
+	chrome.runtime.connect({ name: "popup" })
+	Popup.init()
+}

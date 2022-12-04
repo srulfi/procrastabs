@@ -413,6 +413,33 @@ const ProcrastabsManager = {
 		})
 	},
 
+	async activateCurrentTab() {
+		const currentTab = await this.queryCurrentTab()
+
+		if (currentTab) {
+			this.tabs = this.tabs.map((tab) => {
+				if (tab.id === currentTab.id) {
+					tab.activeAt = Date.now()
+				}
+				return tab
+			})
+
+			this.syncTabsWithClient()
+		}
+	},
+
+	deactivateCurrentTab() {
+		this.tabs = this.tabs.map((tab) => {
+			if (tab.activeAt) {
+				tab.timeActive += Date.now() - tab.activeAt
+				tab.activeAt = null
+			}
+			return tab
+		})
+
+		this.syncTabsWithClient()
+	},
+
 	resetActivity() {
 		this.tabs = this.tabs.map((tab) => ({
 			...tab,
@@ -590,7 +617,7 @@ chrome.runtime.onMessage.addListener((req) => {
 })
 
 /*
-	Start of workaround to "persist" service-worker as Chrome terminates all connections after 5 minutes.
+	Start of workaround to "persist" service-worker as Chrome terminates all connections after 5 minutes (295e3).
 	https://stackoverflow.com/a/66618269
 */
 let lifeline
@@ -598,8 +625,16 @@ let lifeline
 chrome.runtime.onConnect.addListener((port) => {
 	if (port.name === "keep-alive") {
 		lifeline = port
-		setTimeout(forceKeepAlive, 295e3) // 5 minutes minus 5 seconds
+		setTimeout(forceKeepAlive, 295e3)
 		port.onDisconnect.addListener(forceKeepAlive)
+	} else if (port.name === "popup") {
+		lifeline = port
+		setTimeout(forceKeepAlive, 295e3)
+		ProcrastabsManager.deactivateCurrentTab()
+		port.onDisconnect.addListener(() => {
+			ProcrastabsManager.activateCurrentTab()
+			forceKeepAlive()
+		})
 	}
 })
 
