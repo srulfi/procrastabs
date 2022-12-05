@@ -166,11 +166,11 @@ button.active svg {
 	flex-direction: column;
 }
 
-#tabs-tracker span {
+#tracker-panel span {
 	font-size: 12px;
 }
 
-#tabs-tracker button {
+#tracker-panel button {
 	position: absolute;
 	bottom: 10px;
 	right: 10px;
@@ -183,14 +183,14 @@ button.active svg {
 	background: none;
 }
 
-#tabs-tracker button:hover {
+#tracker-panel button:hover {
 	color: #1f2427;
 	background: #1cd155;
 	border-color: #1cd155;
 }
 
-.tabs-tracker-header,
-.tabs-tracker-grid {
+.tracker-header,
+.tracker-grid {
 	display: grid;
 	grid-template-columns: 3fr 1.2fr 1.2fr;
 	grid-gap: 5px 5px;
@@ -199,35 +199,35 @@ button.active svg {
 	padding: 5px;
 }
 
-.tabs-tracker-header {
+.tracker-header {
 	border: none;
 	margin-bottom: 5px;
 	padding-top: 0;
 }
 
-.tabs-tracker-header span {
+.tracker-header span {
 	font-size: 13px;
 	font-weight: bold;
 	text-align: right;
 }
 
-.tabs-tracker-header span:first-child {
+.tracker-header span:first-child {
 	text-align: left;
 }
 
-.tabs-tracker-grid {
+.tracker-grid {
 	margin-bottom: 10px;
 }
 
-.tabs-tracker-grid:last-child {
+.tracker-grid:last-child {
 	margin-bottom: 35px;
 }
 
-.tabs-tracker-grid span {
+.tracker-grid span {
 	text-align: right;
 }
 
-.tabs-tracker-grid span.tab-title {
+.tracker-grid span.tab-title {
 	text-align: left;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -237,8 +237,8 @@ button.active svg {
 	padding-left: 17px;
 }
 
-.tabs-tracker-grid span.tab-title.active,
-.tabs-tracker-grid span.tab-title:hover {
+.tracker-grid span.tab-title.active,
+.tracker-grid span.tab-title:hover {
 	color: #1cd155;
 }
 

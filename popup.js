@@ -1,5 +1,5 @@
 const BTN_ACT_CLASS = "active"
-const TRACKER_CLASS = "tabs-tracker-grid"
+const TRACKER_CLASS = "tracker-grid"
 const TRACKER_TITLE_CLASS = "tab-title"
 const TRACKER_TITLE_ACT_CLASS = "active"
 
@@ -35,9 +35,9 @@ const Popup = {
 	$message: document.querySelector("#message"),
 	$panels: document.querySelectorAll(".panel"),
 	$panelButtons: document.querySelectorAll(".panel-button"),
-	$tabsTracker: document.querySelector("#tabs-tracker"),
-	$tabsStats: document.querySelector("#tabs-stats"),
-	$settings: document.querySelector("#settings"),
+	$trackerPanel: document.querySelector("#tracker-panel"),
+	$statsPanel: document.querySelector("#stats-panel"),
+	$settingsPanel: document.querySelector("#settings-panel"),
 	$trackerButton: document.querySelector("#tracker-button"),
 	$statsButton: document.querySelector("#stats-button"),
 	$settingsButton: document.querySelector("#settings-button"),
@@ -200,13 +200,13 @@ const Popup = {
 		this.$trackerButton.addEventListener("click", () => {
 			if (this.$trackerButton.classList.contains(BTN_ACT_CLASS)) {
 				this.$trackerButton.classList.remove(BTN_ACT_CLASS)
-				this.$tabsTracker.classList.remove(BTN_ACT_CLASS)
+				this.$trackerPanel.classList.remove(BTN_ACT_CLASS)
 			} else {
 				this.$panels.forEach(($panel) => $panel.classList.remove(BTN_ACT_CLASS))
 				this.$panelButtons.forEach(($panelButton) =>
 					$panelButton.classList.remove(BTN_ACT_CLASS)
 				)
-				this.$tabsTracker.classList.add(BTN_ACT_CLASS)
+				this.$trackerPanel.classList.add(BTN_ACT_CLASS)
 				this.$trackerButton.classList.add(BTN_ACT_CLASS)
 			}
 			this.resetMessage()
@@ -215,13 +215,13 @@ const Popup = {
 		this.$statsButton.addEventListener("click", () => {
 			if (this.$statsButton.classList.contains(BTN_ACT_CLASS)) {
 				this.$statsButton.classList.remove(BTN_ACT_CLASS)
-				this.$tabsStats.classList.remove(BTN_ACT_CLASS)
+				this.$statsPanel.classList.remove(BTN_ACT_CLASS)
 			} else {
 				this.$panels.forEach(($panel) => $panel.classList.remove(BTN_ACT_CLASS))
 				this.$panelButtons.forEach(($panelButton) =>
 					$panelButton.classList.remove(BTN_ACT_CLASS)
 				)
-				this.$tabsStats.classList.add(BTN_ACT_CLASS)
+				this.$statsPanel.classList.add(BTN_ACT_CLASS)
 				this.$statsButton.classList.add(BTN_ACT_CLASS)
 			}
 			this.resetMessage()
@@ -230,13 +230,13 @@ const Popup = {
 		this.$settingsButton.addEventListener("click", () => {
 			if (this.$settingsButton.classList.contains(BTN_ACT_CLASS)) {
 				this.$settingsButton.classList.remove(BTN_ACT_CLASS)
-				this.$settings.classList.remove(BTN_ACT_CLASS)
+				this.$settingsPanel.classList.remove(BTN_ACT_CLASS)
 			} else {
 				this.$panels.forEach(($panel) => $panel.classList.remove(BTN_ACT_CLASS))
 				this.$panelButtons.forEach(($panelButton) =>
 					$panelButton.classList.remove(BTN_ACT_CLASS)
 				)
-				this.$settings.classList.add(BTN_ACT_CLASS)
+				this.$settingsPanel.classList.add(BTN_ACT_CLASS)
 				this.$settingsButton.classList.add(BTN_ACT_CLASS)
 			}
 			this.resetMessage()
@@ -284,7 +284,7 @@ const Popup = {
 	populateTracker() {
 		// clear tracker
 		document
-			.querySelectorAll(".tabs-tracker-grid")
+			.querySelectorAll(`.${TRACKER_CLASS}`)
 			.forEach((windowTracker) => windowTracker.remove())
 
 		// create tabs object by `windowId`
@@ -346,7 +346,7 @@ const Popup = {
 				windowTabsGrid.appendChild(timeActiveEl)
 			})
 
-			this.$tabsTracker.appendChild(windowTabsGrid)
+			this.$trackerPanel.appendChild(windowTabsGrid)
 		})
 	},
 
