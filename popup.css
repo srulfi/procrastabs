@@ -242,6 +242,24 @@ button.active svg {
 	color: #1cd155;
 }
 
+.stats-item-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	border-bottom: 1px solid #fff;
+	margin-bottom: 10px;
+}
+
+.stats-item {
+	font-size: 12px;
+}
+
+.stats-item-value {
+	font-family: monospace;
+	font-size: 20px;
+}
+
 .settings-option {
 	display: flex;
 	flex: 1;
