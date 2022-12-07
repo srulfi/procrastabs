@@ -42,17 +42,24 @@ const Popup = {
 	$statsButton: document.querySelector("#stats-button"),
 	$settingsButton: document.querySelector("#settings-button"),
 	$resetTrackerButton: document.querySelector("#tracker-reset-button"),
+	$statsMaxTabs: document.querySelector("#stats-max-tabs"),
+	$statsMaxCountdown: document.querySelector("#stats-max-countdown"),
 
 	async init() {
 		const config = await this.getConfigFromStorage()
 
 		this.tabs = config.tabs
+		this.stats = config.stats
+		this.today = config.today
+
 		this.$maxTabsInput.value = config.maxTabs
 		this.$maxTabsSwitch.checked = config.maxTabsEnabled
 		this.$countdownInput.value = config.countdown
 		this.$countdownSwitch.checked = config.countdownEnabled
 		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
 		this.$killAllModeSwitch.checked = config.killAllMode
+
+		this.$statsMaxTabs.textContent = config.stats[this.today].maxTabs
 
 		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
 		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
@@ -75,6 +82,8 @@ const Popup = {
 				"countdownEnabled",
 				"closeDuplicates",
 				"killAllMode",
+				"stats",
+				"today",
 			])
 			return config
 		} catch (e) {
@@ -259,6 +268,14 @@ const Popup = {
 						}
 						break
 
+					case "stats":
+						this.updateStats(newValue)
+						break
+
+					case "today":
+						this.today = newValue
+						break
+
 					default:
 						break
 				}
@@ -348,6 +365,12 @@ const Popup = {
 
 			this.$trackerPanel.appendChild(windowTabsGrid)
 		})
+	},
+
+	updateStats(newStats) {
+		if (newStats[this.today]?.maxTabs) {
+			this.$statsMaxTabs.textContent = newStats[this.today].maxTabs
+		}
 	},
 
 	setTrackerInterval() {

@@ -22,12 +22,25 @@ const ProcrastabsManager = {
 		const config = await this.getConfigFromStorage()
 
 		const { tabs: storageTabs } = config
+		const today = this.getToday()
 
 		if (!config.maxTabs) {
 			config.maxTabs = tabs.length
 		} else if (config.countdownEnabled && tabs.length > config.maxTabs) {
 			config.maxTabsEnabled = false
 			config.countdownEnabled = false
+		}
+
+		if (!config.today) {
+			config.today = today
+		}
+
+		if (!config.stats) {
+			config.stats = {
+				[today]: {
+					maxTabs: tabs.length,
+				},
+			}
 		}
 
 		this.tabs = tabs.map((currentTab) => {
@@ -122,6 +135,8 @@ const ProcrastabsManager = {
 				"countdownEnabled",
 				"closeDuplicates",
 				"killAllMode",
+				"stats",
+				"today",
 			])
 			return config
 		} catch (e) {
@@ -171,6 +186,7 @@ const ProcrastabsManager = {
 				}
 
 				this.syncTabsWithClient()
+				this.syncStatsMaxTabs()
 			}
 		})
 
@@ -553,6 +569,50 @@ const ProcrastabsManager = {
 		}))
 	},
 
+	getToday() {
+		const year = new Date().getFullYear()
+		const month = new Date().getMonth() + 1
+		const day = new Date().getDate()
+
+		return `${year}-${month}-${day}`
+	},
+
+	async getTodayStats() {
+		try {
+			const today = this.getToday()
+			const { stats } = await chrome.storage.sync.get("stats")
+			const statsObj = stats || {}
+			const todayStats = statsObj[today] || {}
+
+			return { today, todayStats }
+		} catch (e) {
+			console.error(e)
+		}
+	},
+
+	async syncStats(today, todayStats) {
+		try {
+			await chrome.storage.sync.set({
+				today,
+				stats: {
+					[today]: todayStats,
+				},
+			})
+		} catch (e) {
+			console.error(e)
+		}
+	},
+
+	async syncStatsMaxTabs() {
+		const currentTabsCount = this.tabs.length
+		const { today, todayStats } = await this.getTodayStats()
+
+		if (!todayStats.maxTabs || todayStats.maxTabs < currentTabsCount) {
+			todayStats.maxTabs = currentTabsCount
+			await this.syncStats(today, todayStats)
+		}
+	},
+
 	async syncTabsWithClient() {
 		try {
 			const tabs = this.removeExtraPropsFromTabs()
@@ -573,6 +633,8 @@ const ProcrastabsManager = {
 				countdownEnabled: this.config.countdownEnabled,
 				closeDuplicates: this.config.closeDuplicates,
 				killAllMode: this.config.killAllMode,
+				stats: this.config.stats,
+				today: this.config.today,
 			})
 			this.updateBadge()
 		} catch (e) {
