@@ -49,7 +49,6 @@ const Popup = {
 		const config = await this.getConfigFromStorage()
 
 		this.tabs = config.tabs
-		this.stats = config.stats
 		this.today = config.today
 
 		this.$maxTabsInput.value = config.maxTabs
@@ -59,8 +58,6 @@ const Popup = {
 		this.$closeDuplicatesSwitch.checked = config.closeDuplicates
 		this.$killAllModeSwitch.checked = config.killAllMode
 
-		this.$statsMaxTabs.textContent = config.stats[this.today].maxTabs
-
 		this.maxTabsInputMin = parseInt(this.$maxTabsInput.getAttribute("min"))
 		this.maxTabsInputMax = parseInt(this.$maxTabsInput.getAttribute("max"))
 		this.countdownInputMin = parseInt(this.$countdownInput.getAttribute("min"))
@@ -69,6 +66,7 @@ const Popup = {
 		this.setEventListeners()
 		this.setStorageListeners()
 		this.populateTracker()
+		this.populateStats()
 		this.setTrackerInterval()
 	},
 
@@ -82,7 +80,6 @@ const Popup = {
 				"countdownEnabled",
 				"closeDuplicates",
 				"killAllMode",
-				"stats",
 				"today",
 			])
 			return config
@@ -268,12 +265,12 @@ const Popup = {
 						}
 						break
 
-					case "stats":
-						this.updateStats(newValue)
-						break
-
 					case "today":
 						this.today = newValue
+						break
+
+					case this.today:
+						this.updateStats(newValue)
 						break
 
 					default:
@@ -367,9 +364,21 @@ const Popup = {
 		})
 	},
 
+	async populateStats() {
+		try {
+			const stats = await chrome.storage.sync.get(this.today)
+
+			if (stats?.[this.today]) {
+				this.$statsMaxTabs.textContent = stats[this.today].maxTabs
+			}
+		} catch (e) {
+			console.error(e)
+		}
+	},
+
 	updateStats(newStats) {
-		if (newStats[this.today]?.maxTabs) {
-			this.$statsMaxTabs.textContent = newStats[this.today].maxTabs
+		if (newStats.maxTabs) {
+			this.$statsMaxTabs.textContent = newStats.maxTabs
 		}
 	},
 

@@ -22,7 +22,7 @@ const ProcrastabsManager = {
 		const config = await this.getConfigFromStorage()
 
 		const { tabs: storageTabs } = config
-		const today = this.getToday()
+		const today = this.getStatsTodayKey()
 
 		if (!config.maxTabs) {
 			config.maxTabs = tabs.length
@@ -35,11 +35,9 @@ const ProcrastabsManager = {
 			config.today = today
 		}
 
-		if (!config.stats) {
-			config.stats = {
-				[today]: {
-					maxTabs: tabs.length,
-				},
+		if (!config[today]) {
+			config[today] = {
+				maxTabs: tabs.length,
 			}
 		}
 
@@ -127,17 +125,7 @@ const ProcrastabsManager = {
 
 	async getConfigFromStorage() {
 		try {
-			const config = await chrome.storage.sync.get([
-				"tabs",
-				"maxTabs",
-				"maxTabsEnabled",
-				"countdown",
-				"countdownEnabled",
-				"closeDuplicates",
-				"killAllMode",
-				"stats",
-				"today",
-			])
+			const config = await chrome.storage.sync.get()
 			return config
 		} catch (e) {
 			console.error(e)
@@ -569,7 +557,7 @@ const ProcrastabsManager = {
 		}))
 	},
 
-	getToday() {
+	getStatsTodayKey() {
 		const year = new Date().getFullYear()
 		const month = new Date().getMonth() + 1
 		const day = new Date().getDate()
@@ -577,26 +565,20 @@ const ProcrastabsManager = {
 		return `${year}-${month}-${day}`
 	},
 
-	async getTodayStats() {
+	async getStatsFromStorage(dateKey) {
 		try {
-			const today = this.getToday()
-			const { stats } = await chrome.storage.sync.get("stats")
-			const statsObj = stats || {}
-			const todayStats = statsObj[today] || {}
-
-			return { today, todayStats }
+			const stats = await chrome.storage.sync.get(dateKey)
+			return stats?.[dateKey] || {}
 		} catch (e) {
 			console.error(e)
 		}
 	},
 
-	async syncStats(today, todayStats) {
+	async syncTodayStats(todayKey, todayStats) {
 		try {
 			await chrome.storage.sync.set({
-				today,
-				stats: {
-					[today]: todayStats,
-				},
+				today: todayKey,
+				[todayKey]: todayStats,
 			})
 		} catch (e) {
 			console.error(e)
@@ -605,11 +587,12 @@ const ProcrastabsManager = {
 
 	async syncStatsMaxTabs() {
 		const currentTabsCount = this.tabs.length
-		const { today, todayStats } = await this.getTodayStats()
+		const todayKey = this.getStatsTodayKey()
+		const todayStats = await this.getStatsFromStorage(todayKey)
 
 		if (!todayStats.maxTabs || todayStats.maxTabs < currentTabsCount) {
 			todayStats.maxTabs = currentTabsCount
-			await this.syncStats(today, todayStats)
+			await this.syncTodayStats(todayKey, todayStats)
 		}
 	},
 
@@ -633,8 +616,8 @@ const ProcrastabsManager = {
 				countdownEnabled: this.config.countdownEnabled,
 				closeDuplicates: this.config.closeDuplicates,
 				killAllMode: this.config.killAllMode,
-				stats: this.config.stats,
 				today: this.config.today,
+				[this.config.today]: this.config[this.config.today],
 			})
 			this.updateBadge()
 		} catch (e) {
