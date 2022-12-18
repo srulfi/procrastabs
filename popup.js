@@ -44,6 +44,7 @@ const Popup = {
 	$resetTrackerButton: document.querySelector("#tracker-reset-button"),
 	$statsMaxTabs: document.querySelector("#stats-max-tabs"),
 	$statsMaxCountdown: document.querySelector("#stats-max-countdown"),
+	$statsRangeButtons: document.querySelectorAll("#stats-range-selector button"),
 
 	async init() {
 		const config = await this.getConfigFromStorage()
@@ -250,6 +251,16 @@ const Popup = {
 
 		this.$resetTrackerButton.addEventListener("click", () => {
 			chrome.runtime.sendMessage({ id: "tracker-reset" })
+		})
+
+		this.$statsRangeButtons.forEach(($statsRangeButton) => {
+			$statsRangeButton.addEventListener("click", (e) => {
+				this.$statsRangeButtons.forEach(($button) =>
+					$button.classList.remove(BTN_ACT_CLASS)
+				)
+				e.target.classList.add(BTN_ACT_CLASS)
+				console.log(e.target.dataset.range)
+			})
 		})
 	},
 
