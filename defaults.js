@@ -14,4 +14,5 @@ export default {
 	},
 	closeDuplicates: false,
 	killAllMode: false,
+	statsRange: "day",
 }

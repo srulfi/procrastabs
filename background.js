@@ -14,6 +14,7 @@ const ProcrastabsManager = {
 		countdownEnabled: defaults.countdown.enabled,
 		closeDuplicates: defaults.closeDuplicates,
 		killAllMode: defaults.killAllMode,
+		statsRange: defaults.statsRange,
 	},
 
 	async init() {
@@ -616,6 +617,7 @@ const ProcrastabsManager = {
 				countdownEnabled: this.config.countdownEnabled,
 				closeDuplicates: this.config.closeDuplicates,
 				killAllMode: this.config.killAllMode,
+				statsRange: this.config.statsRange,
 				today: this.config.today,
 				[this.config.today]: this.config[this.config.today],
 			})

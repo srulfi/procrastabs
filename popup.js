@@ -64,6 +64,12 @@ const Popup = {
 		this.countdownInputMin = parseInt(this.$countdownInput.getAttribute("min"))
 		this.countdownInputMax = parseInt(this.$countdownInput.getAttribute("max"))
 
+		this.$statsRangeButtons.forEach(($rangeButton) => {
+			if ($rangeButton.dataset.range === config.statsRange) {
+				$rangeButton.classList.add(BTN_ACT_CLASS)
+			}
+		})
+
 		this.setEventListeners()
 		this.setStorageListeners()
 		this.populateTracker()
@@ -73,16 +79,7 @@ const Popup = {
 
 	async getConfigFromStorage() {
 		try {
-			const config = await chrome.storage.sync.get([
-				"tabs",
-				"maxTabs",
-				"maxTabsEnabled",
-				"countdown",
-				"countdownEnabled",
-				"closeDuplicates",
-				"killAllMode",
-				"today",
-			])
+			const config = await chrome.storage.sync.get()
 			return config
 		} catch (e) {
 			this.displayErrorMessage(e)
@@ -255,11 +252,14 @@ const Popup = {
 
 		this.$statsRangeButtons.forEach(($statsRangeButton) => {
 			$statsRangeButton.addEventListener("click", (e) => {
+				const { range } = e.target.dataset
+
 				this.$statsRangeButtons.forEach(($button) =>
 					$button.classList.remove(BTN_ACT_CLASS)
 				)
 				e.target.classList.add(BTN_ACT_CLASS)
-				console.log(e.target.dataset.range)
+				console.log(range)
+				this.setStorageItems({ statsRange: range })
 			})
 		})
 	},
