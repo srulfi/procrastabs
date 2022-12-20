@@ -51,6 +51,7 @@ const Popup = {
 
 		this.tabs = config.tabs
 		this.today = config.today
+		this.statsRange = config.statsRange
 
 		this.$maxTabsInput.value = config.maxTabs
 		this.$maxTabsSwitch.checked = config.maxTabsEnabled
@@ -65,7 +66,7 @@ const Popup = {
 		this.countdownInputMax = parseInt(this.$countdownInput.getAttribute("max"))
 
 		this.$statsRangeButtons.forEach(($rangeButton) => {
-			if ($rangeButton.dataset.range === config.statsRange) {
+			if ($rangeButton.dataset.range === this.statsRange) {
 				$rangeButton.classList.add(BTN_ACT_CLASS)
 			}
 		})
@@ -258,7 +259,6 @@ const Popup = {
 					$button.classList.remove(BTN_ACT_CLASS)
 				)
 				e.target.classList.add(BTN_ACT_CLASS)
-				console.log(range)
 				this.setStorageItems({ statsRange: range })
 			})
 		})
