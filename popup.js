@@ -259,7 +259,10 @@ const Popup = {
 					$button.classList.remove(BTN_ACT_CLASS)
 				)
 				e.target.classList.add(BTN_ACT_CLASS)
+
+				this.statsRange = range
 				this.setStorageItems({ statsRange: range })
+				this.populateStats()
 			})
 		})
 	},
@@ -375,12 +378,55 @@ const Popup = {
 		})
 	},
 
+	async getStatsBySelectedRange() {
+		let stats
+
+		switch (this.statsRange) {
+			case "day":
+				stats = await chrome.storage.sync.get(this.today)
+				return { maxTabs: stats[this.today]?.maxTabs }
+
+			case "week":
+				const todayArray = this.today.split("-")
+				const today = new Date()
+
+				today.setFullYear(todayArray[0])
+				today.setMonth(todayArray[1] - 1)
+				today.setDate(todayArray[2])
+
+				const weeklyStats = [this.today]
+
+				for (let i = 0; i < 6; i += 1) {
+					today.setDate(today.getDate() - 1)
+
+					const year = today.getFullYear()
+					const month = today.getMonth() + 1
+					const day = today.getDate()
+
+					weeklyStats.push(`${year}-${month}-${day}`)
+				}
+
+				stats = await chrome.storage.sync.get(weeklyStats)
+
+				const validStats = Object.values(stats).filter(
+					(dayStats) => dayStats.maxTabs
+				)
+				const sum = Object.values(validStats).reduce(
+					(acc, obj) => acc + obj.maxTabs,
+					0
+				)
+				const average = sum / validStats.length
+
+				return { maxTabs: average }
+		}
+	},
+
 	async populateStats() {
 		try {
-			const stats = await chrome.storage.sync.get(this.today)
+			const stats = await this.getStatsBySelectedRange()
 
-			if (stats?.[this.today]) {
-				this.$statsMaxTabs.textContent = stats[this.today].maxTabs
+			if (stats?.maxTabs) {
+				this.$statsMaxTabs.textContent = stats.maxTabs
 			}
 		} catch (e) {
 			console.error(e)

@@ -36,12 +36,6 @@ const ProcrastabsManager = {
 			config.today = today
 		}
 
-		if (!config[today]) {
-			config[today] = {
-				maxTabs: tabs.length,
-			}
-		}
-
 		this.tabs = tabs.map((currentTab) => {
 			if (storageTabs) {
 				const storageTab = storageTabs.find((sTab) => sTab.id === currentTab.id)
@@ -126,7 +120,17 @@ const ProcrastabsManager = {
 
 	async getConfigFromStorage() {
 		try {
-			const config = await chrome.storage.sync.get()
+			const config = await chrome.storage.sync.get([
+				"tabs",
+				"maxTabs",
+				"maxTabsEnabled",
+				"countdown",
+				"countdownEnabled",
+				"closeDuplicates",
+				"killAllMode",
+				"statsRange",
+				"today",
+			])
 			return config
 		} catch (e) {
 			console.error(e)
@@ -619,7 +623,6 @@ const ProcrastabsManager = {
 				killAllMode: this.config.killAllMode,
 				statsRange: this.config.statsRange,
 				today: this.config.today,
-				[this.config.today]: this.config[this.config.today],
 			})
 			this.updateBadge()
 		} catch (e) {
