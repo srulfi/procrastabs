@@ -25,6 +25,41 @@ const convertToDHM = (milliseconds) => {
 		: "0m"
 }
 
+const getStorageStatsByDaysFromToday = async (today, daysAmount) => {
+	const todayArray = today.split("-")
+	const todayDate = new Date()
+
+	todayDate.setFullYear(todayArray[0])
+	todayDate.setMonth(todayArray[1] - 1)
+	todayDate.setDate(todayArray[2])
+
+	const statsByDays = [today]
+
+	for (let i = 1; i < daysAmount; i += 1) {
+		todayDate.setDate(todayDate.getDate() - 1)
+
+		const year = todayDate.getFullYear()
+		const month = todayDate.getMonth() + 1
+		const day = todayDate.getDate()
+
+		statsByDays.push(`${year}-${month}-${day}`)
+	}
+
+	const storageStats = await chrome.storage.sync.get(statsByDays)
+
+	return storageStats
+}
+
+const getMaxTabsAverage = (stats) => {
+	const validStats = Object.values(stats).filter((dayStats) => dayStats.maxTabs)
+	const sum = Object.values(validStats).reduce(
+		(acc, obj) => acc + obj.maxTabs,
+		0
+	)
+
+	return Math.round(sum / validStats.length)
+}
+
 const Popup = {
 	$maxTabsInput: document.querySelector("#maxtabs-input"),
 	$maxTabsSwitch: document.querySelector("#maxtabs-switch"),
@@ -380,6 +415,15 @@ const Popup = {
 
 	async getStatsBySelectedRange() {
 		let stats
+		let rangeDays
+
+		if (this.statsRange === "week") {
+			rangeDays = 7
+		} else if (this.statsRange === "month") {
+			rangeDays = 30
+		} else if (this.statsRange === "year") {
+			rangeDays = 365
+		}
 
 		switch (this.statsRange) {
 			case "day":
@@ -387,37 +431,12 @@ const Popup = {
 				return { maxTabs: stats[this.today]?.maxTabs }
 
 			case "week":
-				const todayArray = this.today.split("-")
-				const today = new Date()
+			case "month":
+			case "year":
+				stats = await getStorageStatsByDaysFromToday(this.today, rangeDays)
+				const rangeMaxTabsAverage = getMaxTabsAverage(stats)
 
-				today.setFullYear(todayArray[0])
-				today.setMonth(todayArray[1] - 1)
-				today.setDate(todayArray[2])
-
-				const weeklyStats = [this.today]
-
-				for (let i = 0; i < 6; i += 1) {
-					today.setDate(today.getDate() - 1)
-
-					const year = today.getFullYear()
-					const month = today.getMonth() + 1
-					const day = today.getDate()
-
-					weeklyStats.push(`${year}-${month}-${day}`)
-				}
-
-				stats = await chrome.storage.sync.get(weeklyStats)
-
-				const validStats = Object.values(stats).filter(
-					(dayStats) => dayStats.maxTabs
-				)
-				const sum = Object.values(validStats).reduce(
-					(acc, obj) => acc + obj.maxTabs,
-					0
-				)
-				const average = Math.round(sum / validStats.length)
-
-				return { maxTabs: average }
+				return { maxTabs: rangeMaxTabsAverage }
 		}
 	},
 
