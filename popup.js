@@ -415,7 +415,7 @@ const Popup = {
 					(acc, obj) => acc + obj.maxTabs,
 					0
 				)
-				const average = sum / validStats.length
+				const average = Math.round(sum / validStats.length)
 
 				return { maxTabs: average }
 		}
