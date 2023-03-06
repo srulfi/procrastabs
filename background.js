@@ -492,6 +492,11 @@ const ProcrastabsManager = {
 						this.updateBadge()
 					}
 				}
+			} else if (secondsPast > countdownInSeconds) {
+				this.stopCountdown()
+				this.startCountdown()
+				this.setBadgeCountdownColor()
+				this.setBadgeCountdownInMinutes(this.config.countdown)
 			} else if (this.config.badgeCountdownEnabled) {
 				this.setBadgeCountdownColor()
 				if (secondsRemaining < 60) {
